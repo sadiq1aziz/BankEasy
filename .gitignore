@@ -1,0 +1,32 @@
+# IntelliJ IDEA files
+.idea/
+*.iml
+*.iws
+
+# Maven/Gradle directories
+/target/
+/build/
+
+# Logs
+*.log
+
+# Temporary files
+*.class
+*.jar
+*.war
+*.ear
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Eclipse files
+.classpath
+.project
+.settings/
+
+# Node modules
+/node_modules/
+
+# Other files
+/out/
