@@ -31,7 +31,7 @@ public class BaseEntity {
 
    // annotations for auditing
    @CreatedDate
-   //ensure created records cannot be updated
+   //ensure columns for auditing cannot be updated
    @Column(updatable = false)
    private LocalDateTime createdAt;
 
@@ -40,8 +40,7 @@ public class BaseEntity {
    private String createdBy;
 
    @LastModifiedDate
-   //ensure that records to be updated cannot be inserted
-   //ensure that records to be updated cannot be inserted
+   //ensure that columns do not allow values to be inserted but only updated
    @Column(insertable = false)
    private LocalDateTime updatedAt;
 

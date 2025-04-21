@@ -3,6 +3,7 @@ package com.bankeasy.loans.service.impl;
 import com.bankeasy.loans.constants.LoansConstants;
 import com.bankeasy.loans.dto.LoansDto;
 import com.bankeasy.loans.entity.Loans;
+import com.bankeasy.loans.exceptions.LoanAlreadyExistsException;
 import com.bankeasy.loans.exceptions.ResourceNotFoundException;
 import com.bankeasy.loans.mapper.LoansMapper;
 import com.bankeasy.loans.repository.LoansRepository;
@@ -25,9 +26,9 @@ public class LoansServiceImpl implements ILoansService {
     @Override
     public void createLoan(String mobileNumber) {
         //check if loan already exists in system
-        Optional<Loans> oploans = loansRepository.findByMobileNumber(mobileNumber);
-        if(oploans.isPresent()){
-            throw new ResourceNotFoundException("loans", "mobileNumber", mobileNumber);
+        Optional<Loans> fetchloans = loansRepository.findByMobileNumber(mobileNumber);
+        if(fetchloans.isPresent()){
+            throw new LoanAlreadyExistsException("Loan already exists");
         }
 
         //create new Loan
