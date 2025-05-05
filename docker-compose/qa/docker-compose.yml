@@ -1,0 +1,89 @@
+services:
+  accounts:
+    image: "mrlearn/accounts:v1.3"
+    container_name: accounts-ms
+    ports:
+      - "8080:8080"
+    #   define the dependency for this MS to start
+    depends_on:
+      configserver:
+        condition: service_healthy
+    extends:
+      file: common-config.yml
+      service: microservice-environment-config
+    #   variables for the application to use to communicate with config server
+    environment:
+      SPRING_APPLICATION_NAME: "accounts"
+
+  loans:
+    image: "mrlearn/loans:v1.3"
+    container_name: loans-ms
+    ports:
+      - "8090:8090"
+    #   define the dependency for this MS to start
+    depends_on:
+      configserver:
+        condition: service_healthy
+    extends:
+      file: common-config.yml
+      service: microservice-environment-config
+    #   variables for the application to use to communicate with config server
+    environment:
+      SPRING_APPLICATION_NAME: "loans"
+
+  cards:
+    image: "mrlearn/cards:v1.3"
+    container_name: cards-ms
+    ports:
+      - "9000:9000"
+    #   define the dependency for this MS to start
+    depends_on:
+      configserver:
+        condition: service_healthy
+    extends:
+      file: common-config.yml
+      service: microservice-environment-config
+    #   variables for the application to use to communicate with config server within docker network
+    environment:
+      SPRING_APPLICATION_NAME: "accounts"
+
+  configserver:
+    image: "mrlearn/configserver:v1.3"
+    container_name: configserver-ms
+    ports:
+      - "8071:8071"
+    #   props to define health check test for config server using curl cmd
+    healthcheck:
+      test: "curl --fail -silent http://localhost:8071/actuator/health | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      rabbit:
+        condition: service_healthy
+    extends:
+      file: common-config.yml
+      service: microservice-deploy-config
+
+  rabbit:
+    # rabbit requires specifc defined props based on docs
+    image: "rabbitmq:3.12-management"
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    #   props to define health check test for config server using curl cmd
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    extends:
+      file: common-config.yml
+      service: microservice-network-config
+
+networks:
+  bankeasy:
+    driver: "bridge"

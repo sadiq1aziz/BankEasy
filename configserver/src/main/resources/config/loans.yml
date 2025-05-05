@@ -1,0 +1,11 @@
+build:
+  version: "3.0"
+
+accounts:
+  message: "BankEasy Loans Microservice APIs"
+  contactDetails:
+    name: "Harry pete - Developer"
+    email: "harrypete@bankeasy.com"
+  onCallSupport:
+    - (452) 456-2176
+    - (546) 764-8934

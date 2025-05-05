@@ -1,6 +1,7 @@
 package com.bankeasy.cards.controller;
 
 import com.bankeasy.cards.constants.CardsConstants;
+import com.bankeasy.cards.dto.CardsContactInfoDto;
 import com.bankeasy.cards.dto.CardsDto;
 import com.bankeasy.cards.dto.ResponseDto;
 import com.bankeasy.cards.service.ICardService;
@@ -10,18 +11,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-@Component
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(path="/api", produces = {MediaType.APPLICATION_JSON_VALUE})
 @Tag(
         name = "controller for CRUD operations on cards",
@@ -32,8 +32,14 @@ import org.springframework.web.bind.annotation.*;
 //can be at requestBody w.r.t entity or requestParam w.r.t regex
 public class CardsController {
 
+    private final ICardService iCardService;
+
+    @Value("${build.version}")
+    public String buildVersion;
+
     @Autowired
-    ICardService iCardService;
+    private CardsContactInfoDto cardsContactInfoDto;
+
 
     @PostMapping("/create")
     @Operation(
@@ -160,6 +166,49 @@ public class CardsController {
                     .status(HttpStatus.EXPECTATION_FAILED)
                     .body(new ResponseDto(CardsConstants.STATUS_417, CardsConstants.MESSAGE_417_DELETE));
         }
+    }
+
+    @Operation(
+            summary = "Build Info API for Cards",
+            description = "Build Info API for Cards"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Details retrieved successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal Server Error"
+            )
+    })
+    @GetMapping("/build-info")
+    public ResponseEntity<String> fetchBuildInfo (){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(buildVersion);
+    }
+
+
+    @Operation(
+            summary = "Developer Contact Info for Cards",
+            description = "Developer Contact Info for Cards"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Details retrieved successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal Server Error"
+            )
+    })
+    @GetMapping("/contact-info")
+    public ResponseEntity<CardsContactInfoDto> fetchCardswInfo (){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(cardsContactInfoDto);
     }
 
 }

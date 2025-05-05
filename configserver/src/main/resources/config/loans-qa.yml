@@ -1,0 +1,11 @@
+build:
+  version: "2.0"
+
+loans:
+  message: "BankEasy Loans Microservice APIs for QA"
+  contactDetails:
+    name: "Jill Grey - QA Lead"
+    email: "jillgrey@bankeasy.com"
+  onCallSupport:
+    - (785) 545-6565
+    - (853) 546-3467

@@ -1,6 +1,10 @@
 server:
   port: 8090
 spring:
+  application:
+    name: "loans"
+  profiles:
+    active: "prod"
   datasource:
     url: jdbc:h2:mem:testdb
     driverClassName: org.h2.Driver
@@ -14,3 +18,21 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+# Config server address for app to contact
+  config:
+    import: "optional:configserver:http://localhost:8071/"
+# Config details to connect to rabbit messaging queue
+  rabbitmq:
+    host: "localhost"
+    port: 5672
+    username: "guest"
+    password: "guest"
+# management API endpoints are specific endpoints provided by spring and
+# utilized via actuator which exposes them for use.
+# One function is to perform refresh of configuration read from git post a change
+# without having to restart the microservice
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

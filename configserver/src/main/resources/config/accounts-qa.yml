@@ -1,0 +1,11 @@
+build:
+  version: "2.0"
+
+accounts:
+  message: "BankEasy Accounts Microservice APIs for QA"
+  contactDetails:
+    name: "Sam Grey - QA Lead"
+    email: "samgrey@bankeasy.com"
+  onCallSupport:
+    - (666) 265-3765
+    - (666) 734-8371

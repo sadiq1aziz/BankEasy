@@ -1,27 +1,35 @@
 package com.bankEasy.accounts.controller;
 
 
+import com.bankEasy.accounts.dto.AccountsContactInfoDto;
 import com.bankEasy.accounts.dto.CustomerDto;
 import com.bankEasy.accounts.dto.ResponseDto;
 import com.bankEasy.accounts.constants.AccountsConstants;
 import com.bankEasy.accounts.service.IAccountsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 // controllers here will simply handle request and responses, validation etc. No business logic here
 @RestController
 @RequestMapping(path = "/api", produces = {MediaType.APPLICATION_JSON_VALUE})
-@AllArgsConstructor
+//here we let spring know that we want DI to be done on fields that are final
+@RequiredArgsConstructor
 // To ensure validated input in request
 @Validated
 //tag to document summary for Controller/ classes
@@ -31,8 +39,15 @@ import org.springframework.web.bind.annotation.*;
 )
 public class AccountsController {
 
+    private final IAccountsService iAccountsService;
 
-    private IAccountsService iAccountsService;
+    @Value("${build.version}")
+    public String buildVersion;
+
+
+    //Autowiring the Dto object as it is a dependency
+    @Autowired
+    private AccountsContactInfoDto accountsContactInfoDto;
 
     //tag to document summary for API methods
     @Operation (
@@ -101,4 +116,48 @@ public class AccountsController {
        }
 
     }
+
+    @Operation(
+            summary = "Build Info API for Accounts",
+            description = "Build Info API for Accounts"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Details retrieved successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal Server Error"
+            )
+    })
+    @GetMapping("/build-info")
+    public ResponseEntity<String> fetchBuildInfo (){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(buildVersion);
+    }
+
+
+    @Operation(
+            summary = "Developer Contact Info for Cards",
+            description = "Developer Contact Info for Cards"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Details retrieved successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal Server Error"
+            )
+    })
+    @GetMapping("/contact-info")
+    public ResponseEntity<AccountsContactInfoDto> fetchContactInfo (){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(accountsContactInfoDto);
+    }
+
 }

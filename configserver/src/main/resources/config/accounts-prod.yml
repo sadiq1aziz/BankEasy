@@ -1,0 +1,11 @@
+build:
+  version: "1.0"
+
+accounts:
+  message: "BankEasy Accounts Microservice APIs for PROD"
+  contactDetails:
+    name: "Bruce Jupiter - Product Owner"
+    email: "brucejupiter@bankeasy.com"
+  onCallSupport:
+    - (453) 392-4829
+    - (236) 203-0384

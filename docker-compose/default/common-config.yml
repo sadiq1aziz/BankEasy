@@ -1,0 +1,29 @@
+# define custom props / services to cover repetitive configurations
+#stack dependencies one after the other
+services:
+  microservice-network-config:
+    networks:
+      - bankeasy
+
+  microservice-deploy-config:
+    extends:
+      microservice-network-config
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+#   Now we will override the rabbit prop that is defined in the app.yml of each MS
+#   Although the docker compose file doesn't have properties relevant to rabbit for each MS
+    environment:
+#   override the hostname via the below prop as defined from docs
+      SPRING_RABBITMQ_HOST: "rabbit"
+
+  microservice-environment-config:
+    extends:
+      microservice-deploy-config
+    environment:
+#   no optional preceeding URL as we need service to fail if config server not booted
+#   URL will point to the config server name on port 8071
+#   format -> configserver:http://servicename:port wherein service name in this context is accounts, loans etc
+      SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071/"
+      SPRING_PROFILES_ACTIVE: default

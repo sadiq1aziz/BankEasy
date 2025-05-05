@@ -1,21 +1,19 @@
 package com.bankeasy.loans.controller;
 
-
 import com.bankeasy.loans.constants.LoansConstants;
+import com.bankeasy.loans.dto.LoansContactInfoDto;
 import com.bankeasy.loans.dto.LoansDto;
 import com.bankeasy.loans.dto.ResponseDto;
-import com.bankeasy.loans.entity.Loans;
 import com.bankeasy.loans.service.ILoansService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.tags.Tags;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,16 +26,20 @@ import org.springframework.web.bind.annotation.*;
 )
 @RestController
 @RequestMapping(path = "/api", produces = {MediaType.APPLICATION_JSON_VALUE})
-@AllArgsConstructor
+@RequiredArgsConstructor
 //uses the validation dependency from spring IO
 //automatically triggered with respective annotations for validation in method params
 //can be handled via a methodNotFoundArg in a global exception handler class
 @Validated
 public class LoansController {
 
-    @Autowired
-    private ILoansService iLoansService;
+    private final ILoansService iLoansService;
 
+    @Value("${build.version}")
+    public String buildVersion;
+
+    @Autowired
+    private LoansContactInfoDto loansContactInfoDto;
 
     @ApiResponses({
         @ApiResponse(
@@ -153,5 +155,48 @@ public class LoansController {
                 .status(HttpStatus.OK)
                 .body(new ResponseDto(LoansConstants.MESSAGE_200, "200"));
 
+    }
+
+    @Operation(
+            summary = "Build Info API for Loans",
+            description = "Build Info API for Loans"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Details retrieved successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal Server Error"
+            )
+    })
+    @GetMapping("/build-info")
+    public ResponseEntity<String> fetchBuildInfo (){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(buildVersion);
+    }
+
+
+    @Operation(
+            summary = "Developer Contact Info for Loans",
+            description = "Developer Contact Info for Loans"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Details retrieved successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal Server Error"
+            )
+    })
+    @GetMapping("/contact-info")
+    public ResponseEntity<LoansContactInfoDto> fetchLoansInfo (){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(loansContactInfoDto);
     }
 }
