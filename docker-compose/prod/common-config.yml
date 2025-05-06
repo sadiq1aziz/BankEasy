@@ -18,7 +18,7 @@ services:
 #   override the hostname via the below prop as defined from docs
       SPRING_RABBITMQ_HOST: "rabbit"
 
-  microservice-environment-config:
+  microservice-configserver-config:
     extends:
       microservice-deploy-config
     environment:
@@ -27,3 +27,22 @@ services:
 #   format -> configserver:http://servicename:port wherein service name in this context is accounts, loans etc
       SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071/"
       SPRING_PROFILES_ACTIVE: prod
+#   These properties are required for every microservice app to connect to the sql server
+#   Hence we add under the config server commno config which is extended to every app microservice
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+
+
+  microservice-db-configuration:
+    image: "mysql"
+    extends:
+#  We dont restrict memory here , hence we use network instead of deploy config
+      microservice-network-config
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    environment:
+#  Environmental variables with which we create the docker container for sql
+      MYSQL_ROOT_PASSWORD: root

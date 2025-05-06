@@ -1,58 +1,104 @@
 services:
+  accountsdb:
+    container_name: accountsdb
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: accountsdb
+    extends:
+      file: common-config.yml
+      service: microservice-db-configuration
+
+  loansdb:
+    container_name: loansdb
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: loansdb
+    extends:
+      file: common-config.yml
+      service: microservice-db-configuration
+
+# note: for all app modules to talk to oracle via JSBC, internal network is to be used amongs
+# containers in their own network
+# The external ports are only for external apps such as SQLECTRON to connect to.
+
+  cardsdb:
+    container_name: cardsdb
+    ports:
+      - "3308:3306"
+    environment:
+      MYSQL_DATABASE: cardsdb
+    extends:
+      file: common-config.yml
+      service: microservice-db-configuration
+
   accounts:
-    image: "mrlearn/accounts:v1.3"
+    image: "mrlearn/accounts:v1.4"
     container_name: accounts-ms
     ports:
       - "8080:8080"
-    #   define the dependency for this MS to start
+#   define the dependency for this MS to start
     depends_on:
       configserver:
         condition: service_healthy
+      accountsdb:
+        condition: service_healthy
     extends:
       file: common-config.yml
-      service: microservice-environment-config
-    #   variables for the application to use to communicate with config server
+      service: microservice-configserver-config
+#   variables for the application to use to communicate with config server
     environment:
+#   This is the jdbc URL we override from the application.yml of the application ms
+      SPRING_DATASOURCE_URL: jdbc:mysql://accountsdb:3306/accountsdb
       SPRING_APPLICATION_NAME: "accounts"
 
   loans:
-    image: "mrlearn/loans:v1.3"
+    image: "mrlearn/loans:v1.4"
     container_name: loans-ms
     ports:
       - "8090:8090"
-    #   define the dependency for this MS to start
+#   define the dependency for this MS to start
     depends_on:
       configserver:
         condition: service_healthy
+      loansdb:
+        condition: service_healthy
     extends:
       file: common-config.yml
-      service: microservice-environment-config
-    #   variables for the application to use to communicate with config server
+      service: microservice-configserver-config
+#   variables for the application to use to communicate with config server
     environment:
+#   This is the jdbc URL we override from the application.yml of the application ms
+      SPRING_DATASOURCE_URL: jdbc:mysql://loansdb:3306/loansdb
       SPRING_APPLICATION_NAME: "loans"
 
   cards:
-    image: "mrlearn/cards:v1.3"
+    image: "mrlearn/cards:v1.4"
     container_name: cards-ms
     ports:
       - "9000:9000"
-    #   define the dependency for this MS to start
+#   define the dependency for this MS to start
     depends_on:
       configserver:
         condition: service_healthy
+      cardsdb:
+        condition: service_healthy
     extends:
       file: common-config.yml
-      service: microservice-environment-config
-    #   variables for the application to use to communicate with config server within docker network
+      service: microservice-configserver-config
+#   variables for the application to use to communicate with config server within docker network
     environment:
-      SPRING_APPLICATION_NAME: "accounts"
+#   This is the jdbc URL we override from the application.yml of the application ms
+      SPRING_DATASOURCE_URL: jdbc:mysql://cardsdb:3306/cardsdb
+      SPRING_APPLICATION_NAME: "cards"
 
   configserver:
-    image: "mrlearn/configserver:v1.3"
+    image: "mrlearn/configserver:v1.4"
     container_name: configserver-ms
     ports:
       - "8071:8071"
-    #   props to define health check test for config server using curl cmd
+#   props to define health check test for config server using curl cmd
     healthcheck:
       test: "curl --fail -silent http://localhost:8071/actuator/health | grep UP || exit 1"
       interval: 10s
@@ -67,7 +113,7 @@ services:
       service: microservice-deploy-config
 
   rabbit:
-    # rabbit requires specifc defined props based on docs
+# rabbit requires specifc defined props based on docs
     image: "rabbitmq:3.12-management"
     hostname: rabbitmq
     ports:
