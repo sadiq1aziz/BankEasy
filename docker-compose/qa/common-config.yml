@@ -28,10 +28,16 @@ services:
       SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071/"
       SPRING_PROFILES_ACTIVE: qa
 #   These properties are required for every microservice app to connect to the sql server
-#   Hence we add under the config server commno config which is extended to every app microservice
+#   Hence we add under the config server common config which is extended to every app microservice
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
 
+  microservice-eurekaserver-config:
+    extends:
+      microservice-configserver-config
+    environment:
+#  expose the uri for microservices to connect to eureka
+      SPRING_EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka
 
   microservice-db-configuration:
     image: "mysql"

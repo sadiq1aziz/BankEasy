@@ -82,6 +82,14 @@
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>2.5.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-openfeign</artifactId>
+		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
@@ -103,7 +111,7 @@
 				<version>3.4.5</version>
 				<configuration>
 					<to>
-						<image>mrlearn/${project.artifactId}:v1.4</image>
+						<image>mrlearn/${project.artifactId}:v1.5</image>
 					</to>
 				</configuration>
 			</plugin>

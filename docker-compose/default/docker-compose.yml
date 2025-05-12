@@ -34,7 +34,7 @@ services:
       service: microservice-db-configuration
 
   accounts:
-    image: "mrlearn/accounts:v1.4"
+    image: "mrlearn/accounts:v1.5"
     container_name: accounts-ms
     ports:
       - "8080:8080"
@@ -44,9 +44,11 @@ services:
         condition: service_healthy
       accountsdb:
         condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
     extends:
       file: common-config.yml
-      service: microservice-configserver-config
+      service: microservice-eurekaserver-config
 #   variables for the application to use to communicate with config server
     environment:
 #   This is the jdbc URL we override from the application.yml of the application ms
@@ -54,7 +56,7 @@ services:
       SPRING_APPLICATION_NAME: "accounts"
 
   loans:
-    image: "mrlearn/loans:v1.4"
+    image: "mrlearn/loans:v1.5"
     container_name: loans-ms
     ports:
       - "8090:8090"
@@ -64,17 +66,41 @@ services:
         condition: service_healthy
       loansdb:
         condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
     extends:
       file: common-config.yml
-      service: microservice-configserver-config
+      service: microservice-eurekaserver-config
 #   variables for the application to use to communicate with config server
     environment:
 #   This is the jdbc URL we override from the application.yml of the application ms
       SPRING_DATASOURCE_URL: jdbc:mysql://loansdb:3306/loansdb
       SPRING_APPLICATION_NAME: "loans"
 
+  loans1:
+    image: "mrlearn/loans:v1.5"
+    container_name: loans-ms1
+    ports:
+      - "8091:8090"
+    #   define the dependency for this MS to start
+    depends_on:
+      configserver:
+        condition: service_healthy
+      loansdb:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
+    extends:
+      file: common-config.yml
+      service: microservice-eurekaserver-config
+    #   variables for the application to use to communicate with config server
+    environment:
+      #   This is the jdbc URL we override from the application.yml of the application ms
+      SPRING_DATASOURCE_URL: jdbc:mysql://loansdb:3306/loansdb
+      SPRING_APPLICATION_NAME: "loans"
+      
   cards:
-    image: "mrlearn/cards:v1.4"
+    image: "mrlearn/cards:v1.5"
     container_name: cards-ms
     ports:
       - "9000:9000"
@@ -84,9 +110,11 @@ services:
         condition: service_healthy
       cardsdb:
         condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
     extends:
       file: common-config.yml
-      service: microservice-configserver-config
+      service: microservice-eurekaserver-config
 #   variables for the application to use to communicate with config server within docker network
     environment:
 #   This is the jdbc URL we override from the application.yml of the application ms
@@ -94,7 +122,7 @@ services:
       SPRING_APPLICATION_NAME: "cards"
 
   configserver:
-    image: "mrlearn/configserver:v1.4"
+    image: "mrlearn/configserver:v1.5"
     container_name: configserver-ms
     ports:
       - "8071:8071"
@@ -111,6 +139,31 @@ services:
     extends:
       file: common-config.yml
       service: microservice-deploy-config
+
+  eurekaserver:
+    image: "mrlearn/eurekaserver:v1.5"
+    container_name: eurekaserver-ms
+    ports:
+      - "8070:8070"
+#   props to define health check test for eureka server using curl cmd
+    healthcheck:
+      test: "curl --fail -silent http://localhost:8070/actuator/health | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      rabbit:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
+#  eurekaserver is the central registry for microservices to register and discover others.
+#  Hence, we define a spring application name
+    environment:
+      SPRING_APPLICATION_NAME: eurekaserver
 
   rabbit:
 # rabbit requires specifc defined props based on docs
