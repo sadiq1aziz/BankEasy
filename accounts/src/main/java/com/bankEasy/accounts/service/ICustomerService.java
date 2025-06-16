@@ -6,6 +6,6 @@ import org.springframework.http.ResponseEntity;
 
 public interface ICustomerService {
 
-    public CustomerDetailsDto fetchCustomerDetails(String mobileNumber);
+    public CustomerDetailsDto fetchCustomerDetails(String mobileNumber, String correlationId);
 
 }

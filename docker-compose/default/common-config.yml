@@ -35,6 +35,9 @@ services:
   microservice-eurekaserver-config:
     extends:
       microservice-configserver-config
+    depends_on:
+      eurekaserver:
+        condition: service_healthy
     environment:
 #  expose the uri for microservices to connect to eureka
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka

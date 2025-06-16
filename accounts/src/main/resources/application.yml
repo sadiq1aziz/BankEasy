@@ -42,7 +42,15 @@ management:
   endpoint:
     shutdown:
       access: unrestricted
+    health:
+      probes:
+        enabled: true
 
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
 
 # enable shutdown mechanism
 endpoints:
@@ -70,4 +78,13 @@ info:
     name: "accounts"
     description: "BankEasy microservice for customer accounts"
     version: "1.0.0"
+
+# activate debug logging
+logging:
+  level:
+    com:
+      bankEasy:
+        accounts: DEBUG
+
+
 

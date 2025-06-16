@@ -44,6 +44,14 @@ management:
   endpoint:
     shutdown:
       access: unrestricted
+    health:
+      probes:
+        enabled: true
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
 
 
 # enable shutdown mechanism
@@ -72,3 +80,10 @@ info:
     name: "cards"
     description: "BankEasy microservice for customer cards"
     version: "1.0.0"
+
+# activate debug logging
+logging:
+  level:
+    com:
+      bankeasy:
+        cards: DEBUG

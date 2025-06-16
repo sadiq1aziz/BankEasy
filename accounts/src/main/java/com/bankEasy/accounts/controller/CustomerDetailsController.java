@@ -8,14 +8,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(
         name = "Rest Controller",
@@ -26,6 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Validated
 public class CustomerDetailsController {
+
+    private static final Logger logger = LoggerFactory.getLogger(CustomerDetailsController.class);
 
     private final ICustomerService iCustomerService;
 
@@ -44,11 +45,18 @@ public class CustomerDetailsController {
             description = "REST method to fetch customer details"
     )
     //fetch API
-    @GetMapping("/fetchCustomerDetails")
-    public ResponseEntity<CustomerDetailsDto> fetchCustomerDetails(@RequestParam @Pattern(regexp = "^$|[0-9]{10}",
-            message = "Mobile number must be 10 digits") String mobileNumber) {
+    //Note that this endpoint will fetch details from all microservices in this application i.e accounts, loans, cards
+    //Accomplished using the feign client component
 
-        CustomerDetailsDto customerDetailsDto = iCustomerService.fetchCustomerDetails(mobileNumber);
+    //Since we will use this endpoint to directly return data to the consumer, we need to ensure that
+    // we have a traced or correlation id for visibility.
+    @GetMapping("/fetchCustomerDetails")
+    public ResponseEntity<CustomerDetailsDto> fetchCustomerDetails(
+            @RequestHeader("bankeasy-correlation-id") String correlationId,
+            @RequestParam @Pattern(regexp = "^$|[0-9]{10}",
+            message = "Mobile number must be 10 digits") String mobileNumber) {
+        logger.debug("bankeasy-correlation-id fetched in fetchCustomerDetails controller method: {}", correlationId);
+        CustomerDetailsDto customerDetailsDto = iCustomerService.fetchCustomerDetails(mobileNumber, correlationId);
         return new ResponseEntity<>(customerDetailsDto, HttpStatus.FOUND);
     }
 }

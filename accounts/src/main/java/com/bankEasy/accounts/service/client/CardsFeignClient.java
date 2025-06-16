@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Pattern;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 // Here the goal is to obtain instance details mentioned in the feign client via eureka
@@ -26,6 +27,5 @@ public interface CardsFeignClient {
 
     //mapping and return types to match the actual target microservice controller method
     @GetMapping(value = "/api/fetch",consumes = "application/json")
-    public ResponseEntity<CardsDto> fetchCard (@RequestParam String mobileNumber);
-
+    public ResponseEntity<CardsDto> fetchCard (@RequestParam String mobileNumber, @RequestHeader("bankeasy-correlation-id") String correlationId);
 }

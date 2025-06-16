@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: "gatewayserver"
+  # Config server address for app to contactO
+  config:
+    import: "optional:configserver:http://localhost:8071/"
+  # Gateway config to ensure that external traffic is forwarded to the corresponding microservices
+  # Occurs when the gateway server locates all the microservice details from registry using eureka
+  cloud:
+    gateway:
+      discovery:
+        locator:
+  # Disable locator to use custom routing instead rather than rely on eureka for microservice path details
+          enabled: false
+  # To ensure that the microservices urls make use of lowercase convention than the default uppercase
+  # which can be seen under the actuator/gateway/routes endpoint url
+          lowerCaseServiceId: true
+  # We dont have profiles for eureka server as props are the same
+  # management API endpoints are specific endpoints provided by spring and
+  # utilized via actuator which exposes them for use.
+  # One function is to perform refresh of configuration read from git post a change
+  # without having to restart the microservice
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    readiness-state:
+      enabled: true
+    liveness-state:
+      enabled: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
+    gateway:
+      enabled: true
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: "gatewayserver"
+    description: "gateway server for bankeasy microservices"
+    version: "1.6"
+
+# activate debug logging
+logging:
+  level:
+    com:
+      bankeasy:
+        gatewayserver: DEBUG
+

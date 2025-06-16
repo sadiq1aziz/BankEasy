@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -34,6 +36,7 @@ import org.springframework.web.bind.annotation.*;
 public class LoansController {
 
     private final ILoansService iLoansService;
+    private static final Logger logger = LoggerFactory.getLogger(LoansController.class);
 
     @Value("${build.version}")
     public String buildVersion;
@@ -86,8 +89,9 @@ public class LoansController {
     //fetch API
     @GetMapping("/fetch-loan")
     public ResponseEntity<LoansDto> fetchLoans ( @RequestParam @Pattern(regexp = "^$|[0-9]{10}",
-            message = "Mobile number must be 10 digits") String mobileNumber){
-
+            message = "Mobile number must be 10 digits") String mobileNumber,
+                                                 @RequestHeader("bankeasy-correlation-id") String correlationId){
+        logger.debug("bankeasy-correlation-id fetched in loans controller method: {}", correlationId);
         //use create loan service
         LoansDto loansDto = iLoansService.fetchLoan(mobileNumber);
 
