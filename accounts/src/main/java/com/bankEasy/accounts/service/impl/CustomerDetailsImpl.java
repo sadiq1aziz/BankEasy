@@ -11,6 +11,7 @@ import com.bankEasy.accounts.repository.AccountsRepository;
 import com.bankEasy.accounts.repository.CustomerRepository;
 import com.bankEasy.accounts.service.ICustomerService;
 import com.bankEasy.accounts.service.client.CardsFeignClient;
+import com.bankEasy.accounts.service.client.LoansFallback;
 import com.bankEasy.accounts.service.client.LoansFeignClient;
 
 import com.bankEasy.accounts.entity.Customer;
@@ -43,9 +44,14 @@ public class CustomerDetailsImpl implements ICustomerService {
         Accounts accounts = accountsRepository.findByCustomerId(customer.getCustomerId()).orElseThrow(() -> new ResourceNotFoundException("account", "mobileNumber", mobileNumber));
         ResponseEntity<LoansDto> loanResponse = loansFeignClient.fetchLoan(mobileNumber, correlationId);
         ResponseEntity<CardsDto> cardsResponse = cardsFeignClient.fetchCard(mobileNumber, correlationId);
-
-        LoansDto loansDto = loanResponse.getBody();
-        CardsDto cardsDto = cardsResponse.getBody();
+        LoansDto loansDto = null;
+        CardsDto cardsDto = null;
+        if (null != loanResponse){
+            loansDto = loanResponse.getBody();
+        }
+        if (null != cardsResponse){
+            cardsDto = cardsResponse.getBody();
+        }
         CustomerDto customerDto = CustomerMapper.mapToCustomerDto(new CustomerDto(), customer);
         AccountsDto accountsDto = AccountsMapper.mapToAccountsDto(new AccountsDto(), accounts);
 

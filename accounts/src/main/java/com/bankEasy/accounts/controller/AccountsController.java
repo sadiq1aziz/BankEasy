@@ -6,6 +6,9 @@ import com.bankEasy.accounts.dto.CustomerDto;
 import com.bankEasy.accounts.dto.ResponseDto;
 import com.bankEasy.accounts.constants.AccountsConstants;
 import com.bankEasy.accounts.service.IAccountsService;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
+import io.netty.util.Timeout;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -14,6 +17,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -22,7 +27,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 
 // controllers here will simply handle request and responses, validation etc. No business logic here
@@ -40,6 +47,7 @@ import java.util.List;
 public class AccountsController {
 
     private final IAccountsService iAccountsService;
+    private static final Logger logger = LoggerFactory.getLogger(AccountsController.class);
 
     @Value("${build.version}")
     public String buildVersion;
@@ -132,10 +140,24 @@ public class AccountsController {
             )
     })
     @GetMapping("/build-info")
-    public ResponseEntity<String> fetchBuildInfo (){
+//  Note: When implementing CB + retry , the CB timeout needs to be more than the retry time
+    @Retry(name = "fetchBuildInfo", fallbackMethod = "fetchBuildInfoFallback")
+    public ResponseEntity<String> fetchBuildInfo () throws TimeoutException {
+        logger.debug("fetching build info for accounts" + LocalDateTime.now());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(buildVersion);
+    }
+
+//  Implementing fallback with retry in microservice as opposed to gatewayserver
+//  gateway cannot implement fallback with retry apparently
+//  Implemented retry config with params for function
+//  Note: Throwable t will be the detault arg in the fallback method, any additional args follow as per original method
+    public ResponseEntity<String> fetchBuildInfoFallback( Throwable t){
+        logger.debug("fallback on fetchBuildInfo for accounts" + LocalDateTime.now());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Exception encountered due to timeout. Please try again later");
     }
 
 
@@ -153,11 +175,18 @@ public class AccountsController {
                     description = "Internal Server Error"
             )
     })
+    @RateLimiter(name = "fetchContactInfoRatelimiter", fallbackMethod = "fetchContactInfoFallback")
     @GetMapping("/contact-info")
     public ResponseEntity<AccountsContactInfoDto> fetchContactInfo (){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(accountsContactInfoDto);
+    }
+
+    public ResponseEntity<String> fetchContactInfoFallback (Throwable t){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Exception encountered on account of too many requests. Please try again later");
     }
 
 }

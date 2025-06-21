@@ -22,7 +22,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 //Note : all client interfaces will be invoked from parent invoker method which is defined in interface under service
 
-@FeignClient("cards")
+//Here since we are implementing the fallback mechanism as part of CB pattern, we add the metadata reference
+@FeignClient(name = "cards", fallback = CardsFallback.class)
 public interface CardsFeignClient {
 
     //mapping and return types to match the actual target microservice controller method

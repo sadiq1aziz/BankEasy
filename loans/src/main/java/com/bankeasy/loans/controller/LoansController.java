@@ -22,6 +22,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+
 @Tag(
         name = "Rest Controller",
         description = "Rest Controller for Microservice API operations"
@@ -199,6 +201,7 @@ public class LoansController {
     })
     @GetMapping("/contact-info")
     public ResponseEntity<LoansContactInfoDto> fetchLoansInfo (){
+        logger.debug("fetching contact details for loans" + LocalDateTime.now());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(loansContactInfoDto);

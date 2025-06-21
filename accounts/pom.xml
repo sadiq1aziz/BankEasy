@@ -88,7 +88,15 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-openfeign</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
 		</dependency>
 	</dependencies>
 	<dependencyManagement>
@@ -111,7 +119,7 @@
 				<version>3.4.5</version>
 				<configuration>
 					<to>
-						<image>mrlearn/${project.artifactId}:v1.6</image>
+						<image>mrlearn/${project.artifactId}:v1.7</image>
 					</to>
 				</configuration>
 			</plugin>

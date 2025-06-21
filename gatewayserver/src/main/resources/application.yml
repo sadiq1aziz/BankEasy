@@ -15,6 +15,18 @@ spring:
   # To ensure that the microservices urls make use of lowercase convention than the default uppercase
   # which can be seen under the actuator/gateway/routes endpoint url
           lowerCaseServiceId: true
+  # global timeout config to ensure that in cases of non responsiveness, exception is thrown
+  # can be overridden by config from CB pattern
+      httpclient:
+       connect-timeout: 1000
+       response-timeout: 2s
+  #
+  data:
+    redis:
+      connect-timeout: 2s
+      host: localhost
+      port: 6379
+      timeout: 1s
   # We dont have profiles for eureka server as props are the same
   # management API endpoints are specific endpoints provided by spring and
   # utilized via actuator which exposes them for use.
@@ -53,3 +65,12 @@ logging:
       bankeasy:
         gatewayserver: DEBUG
 
+
+resilience4j.circuitbreaker:
+  configs:
+    default:
+# call amount to be monitored before status is changed from closed to open
+      slidingWindowSize: 10
+      permittedNumberOfCallsInHalfOpenState: 2
+      failureRateThreshold: 50
+      waitDurationInOpenState: 10000
