@@ -52,6 +52,10 @@ management:
       enabled: true
     liveness-state:
       enabled: true
+# Micrometer configuration to monitor app health
+  metrics:
+    logs:
+      application: ${spring.application.name}
 
 
 # enable shutdown mechanism
@@ -87,3 +91,6 @@ logging:
     com:
       bankeasy:
         cards: DEBUG
+# log pattern for distributed tracing via open telemetry
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"

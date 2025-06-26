@@ -25,5 +25,17 @@ management:
     health:
       probes:
         enabled: true
+# Micrometer configuration to monitor app health
+  metrics:
+    logs:
+      application: ${spring.application.name}
 
+logging:
+  level:
+    com:
+      bankeasy:
+        eurekaserver: DEBUG
+# log pattern for distributed tracing via open telemetry
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
 

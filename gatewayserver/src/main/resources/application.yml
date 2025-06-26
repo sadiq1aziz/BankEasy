@@ -19,7 +19,7 @@ spring:
   # can be overridden by config from CB pattern
       httpclient:
        connect-timeout: 1000
-       response-timeout: 2s
+       response-timeout: 10s
   #
   data:
     redis:
@@ -51,6 +51,10 @@ management:
   info:
     env:
       enabled: true
+# Micrometer configuration to monitor app health
+  metrics:
+    logs:
+      application: ${spring.application.name}
 
 info:
   app:
@@ -64,6 +68,9 @@ logging:
     com:
       bankeasy:
         gatewayserver: DEBUG
+# log pattern for distributed tracing via open telemetry
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
 
 
 resilience4j.circuitbreaker:

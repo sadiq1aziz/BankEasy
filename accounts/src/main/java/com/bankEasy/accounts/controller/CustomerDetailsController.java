@@ -55,8 +55,9 @@ public class CustomerDetailsController {
             @RequestHeader("bankeasy-correlation-id") String correlationId,
             @RequestParam @Pattern(regexp = "^$|[0-9]{10}",
             message = "Mobile number must be 10 digits") String mobileNumber) {
-        logger.debug("bankeasy-correlation-id fetched in fetchCustomerDetails controller method: {}", correlationId);
+        logger.debug("fetching customer details: operation start");
         CustomerDetailsDto customerDetailsDto = iCustomerService.fetchCustomerDetails(mobileNumber, correlationId);
+        logger.debug("fetching customer details: opeation complete");
         return new ResponseEntity<>(customerDetailsDto, HttpStatus.FOUND);
     }
 }

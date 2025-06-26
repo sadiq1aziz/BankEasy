@@ -1,4 +1,223 @@
 services:
+  read:
+    image: grafana/loki:latest
+    command: "-config.file=/etc/loki/config.yaml -target=read"
+    ports:
+      - 3101:3100
+      - 7946
+      - 9095
+    volumes:
+      - ../observability/loki/loki-config.yaml:/etc/loki/config.yaml
+    depends_on:
+      - minio
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: &loki-dns
+      bankeasy:
+        aliases:
+          - loki
+
+  write:
+    image: grafana/loki:latest
+    command: "-config.file=/etc/loki/config.yaml -target=write"
+    ports:
+      - 3102:3100
+      - 7946
+      - 9095
+    volumes:
+      - ../observability/loki/loki-config.yaml:/etc/loki/config.yaml
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      - minio
+    networks:
+      <<: *loki-dns
+
+  alloy:
+    image: grafana/alloy:latest
+    volumes:
+      - ../observability/alloy/alloy-local-config.yaml:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
+    ports:
+      - 12345:12345
+    depends_on:
+      - gateway
+    extends:
+      file: common-config.yml
+      service: microservice-deploy-config
+
+  minio:
+    image: minio/minio
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        mkdir -p /data/loki-data && \
+        mkdir -p /data/loki-ruler && \
+        minio server /data
+    environment:
+      - MINIO_ROOT_USER=loki
+      - MINIO_ROOT_PASSWORD=supersecret
+      - MINIO_PROMETHEUS_AUTH_TYPE=public
+      - MINIO_UPDATE=off
+    ports:
+      - 9000
+    volumes:
+      - ./.data/minio:/data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 15s
+      timeout: 20s
+      retries: 5
+    extends:
+      file: common-config.yml
+      service: microservice-deploy-config
+
+  prometheus:
+    image: prom/prometheus:v2.50.1
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../observability/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml
+    extends:
+      file: common-config.yml
+      service: microservice-deploy-config
+
+  tempo:
+    image: grafana/tempo
+    container_name: tempo
+    command:
+      - '--config.file=/etc/tempo-config.yaml'
+    ports:
+      - "3110:3100"
+      - "4317:4317"
+    volumes:
+      - ../observability/tempo/tempo.yaml:/etc/tempo-config.yaml
+    extends:
+      file: common-config.yml
+      service: microservice-deploy-config
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    depends_on:
+      - gateway
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        /run.sh
+    volumes:
+      - ../observability/grafana/datasource.yaml:/etc/grafana//provisioning/datasources/datasource.yaml
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    extends:
+      file: common-config.yml
+      service: microservice-deploy-config
+
+  backend:
+    image: grafana/loki:latest
+    volumes:
+      - ../observability/loki/loki-config.yaml:/etc/loki/config.yaml
+    ports:
+      - "3100"
+      - "7946"
+    command: "-config.file=/etc/loki/config.yaml -target=backend -legacy-read-mode=false"
+    depends_on:
+      - gateway
+    extends:
+      file: common-config.yml
+      service: microservice-deploy-config
+
+
+  gateway:
+    image: nginx:latest
+    depends_on:
+      - read
+      - write
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        cat <<EOF > /etc/nginx/nginx.conf
+        user  nginx;
+        worker_processes  5;  ## Default: 1
+        
+        events {
+          worker_connections   1000;
+        }
+        
+        http {
+          resolver 127.0.0.11;
+        
+          server {
+            listen             3100;
+        
+            location = / {
+              return 200 'OK';
+              auth_basic off;
+            }
+        
+            location = /api/prom/push {
+              proxy_pass       http://write:3100\$$request_uri;
+            }
+        
+            location = /api/prom/tail {
+              proxy_pass       http://read:3100\$$request_uri;
+              proxy_set_header Upgrade \$$http_upgrade;
+              proxy_set_header Connection "upgrade";
+            }
+        
+            location ~ /api/prom/.* {
+              proxy_pass       http://read:3100\$$request_uri;
+            }
+        
+            location = /loki/api/v1/push {
+              proxy_pass       http://write:3100\$$request_uri;
+            }
+        
+            location = /loki/api/v1/tail {
+              proxy_pass       http://read:3100\$$request_uri;
+              proxy_set_header Upgrade \$$http_upgrade;
+              proxy_set_header Connection "upgrade";
+            }
+        
+            location ~ /loki/api/.* {
+              proxy_pass       http://read:3100\$$request_uri;
+            }
+          }
+        }
+        EOF
+        /docker-entrypoint.sh nginx -g "daemon off;"
+    ports:
+      - "3100:3100"
+    healthcheck:
+      test: [ "CMD", "service", "nginx", "status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    extends:
+      file: common-config.yml
+      service: microservice-deploy-config
+
   redis:
     image: redis
     ports:
@@ -49,16 +268,16 @@ services:
       service: microservice-db-configuration
 
   accounts:
-    image: "mrlearn/accounts:v1.7"
+    image: "mrlearn/accounts:v1.8"
     container_name: accounts-ms
     ports:
       - "8080:8080"
     #   props to define health check test for accounts using curl cmd
     healthcheck:
       test: "curl --fail -silent http://localhost:8080/actuator/health | grep UP || exit 1"
-      interval: 10s
+      interval: 20s
       timeout: 5s
-      retries: 10
+      retries: 20
       start_period: 10s
     #   define the dependency for this MS to start
     depends_on:
@@ -71,21 +290,23 @@ services:
       service: microservice-eurekaserver-config
     #   variables for the application to use to communicate with config server
     environment:
-      #   This is the jdbc URL we override from the application.yml of the application ms
+    #   This is the jdbc URL we override from the application.yml of the application ms
       SPRING_DATASOURCE_URL: jdbc:mysql://accountsdb:3306/accountsdb
       SPRING_APPLICATION_NAME: "accounts"
+    #   app name for otel to identify
+      OTEL_SERVICE_NAME: "accounts"
 
   loans:
-    image: "mrlearn/loans:v1.7"
+    image: "mrlearn/loans:v1.8"
     container_name: loans-ms
     ports:
       - "8090:8090"
     #   props to define health check test for loans using curl cmd
     healthcheck:
       test: "curl --fail -silent http://localhost:8090/actuator/health | grep UP || exit 1"
-      interval: 10s
+      interval: 20s
       timeout: 5s
-      retries: 10
+      retries: 20
       start_period: 10s
     #   define the dependency for this MS to start
     depends_on:
@@ -98,21 +319,23 @@ services:
       service: microservice-eurekaserver-config
     #   variables for the application to use to communicate with config server
     environment:
-      #   This is the jdbc URL we override from the application.yml of the application ms
+    #   This is the jdbc URL we override from the application.yml of the application ms
       SPRING_DATASOURCE_URL: jdbc:mysql://loansdb:3306/loansdb
       SPRING_APPLICATION_NAME: "loans"
+    #  app name for otel to identify
+      OTEL_SERVICE_NAME: "loans"
 
   loans1:
-    image: "mrlearn/loans:v1.7"
+    image: "mrlearn/loans:v1.8"
     container_name: loans-ms1
     ports:
       - "8091:8090"
     #   props to define health check test for loans using curl cmd
     healthcheck:
       test: "curl --fail -silent http://localhost:8091/actuator/health | grep UP || exit 1"
-      interval: 10s
+      interval: 20s
       timeout: 5s
-      retries: 10
+      retries: 20
       start_period: 10s
     #   define the dependency for this MS to start
     depends_on:
@@ -125,21 +348,23 @@ services:
       service: microservice-eurekaserver-config
     #   variables for the application to use to communicate with config server
     environment:
-      #   This is the jdbc URL we override from the application.yml of the application ms
+    #   This is the jdbc URL we override from the application.yml of the application ms
       SPRING_DATASOURCE_URL: jdbc:mysql://loansdb:3306/loansdb
-      SPRING_APPLICATION_NAME: "loans"
+      SPRING_APPLICATION_NAME: "loans1"
+    #  app name for otel to identify
+      OTEL_SERVICE_NAME: "loans1"
 
   cards:
-    image: "mrlearn/cards:v1.7"
+    image: "mrlearn/cards:v1.8"
     container_name: cards-ms
     ports:
       - "9000:9000"
     #   props to define health check test for cards using curl cmd
     healthcheck:
       test: "curl --fail -silent http://localhost:9000/actuator/health | grep UP || exit 1"
-      interval: 10s
+      interval: 20s
       timeout: 5s
-      retries: 10
+      retries: 20
       start_period: 10s
     #   define the dependency for this MS to start
     depends_on:
@@ -152,21 +377,23 @@ services:
       service: microservice-eurekaserver-config
     #   variables for the application to use to communicate with config server within docker network
     environment:
-      #   This is the jdbc URL we override from the application.yml of the application ms
+    #   This is the jdbc URL we override from the application.yml of the application ms
       SPRING_DATASOURCE_URL: jdbc:mysql://cardsdb:3306/cardsdb
       SPRING_APPLICATION_NAME: "cards"
+    #  app name for otel to identify
+      OTEL_SERVICE_NAME: "cards"
 
   configserver:
-    image: "mrlearn/configserver:v1.7"
+    image: "mrlearn/configserver:v1.8"
     container_name: configserver-ms
     ports:
       - "8071:8071"
     #   props to define health check test for config server using curl cmd
     healthcheck:
       test: "curl --fail -silent http://localhost:8071/actuator/health | grep UP || exit 1"
-      interval: 10s
+      interval: 20s
       timeout: 5s
-      retries: 10
+      retries: 20
       start_period: 10s
     depends_on:
       rabbit:
@@ -174,18 +401,21 @@ services:
     extends:
       file: common-config.yml
       service: microservice-deploy-config
+    environment:
+#  app name for otel to identify
+      OTEL_SERVICE_NAME: "configserver"
 
   eurekaserver:
-    image: "mrlearn/eurekaserver:v1.7"
+    image: "mrlearn/eurekaserver:v1.8"
     container_name: eurekaserver-ms
     ports:
       - "8070:8070"
     #   props to define health check test for eureka server using curl cmd
     healthcheck:
       test: "curl --fail -silent http://localhost:8070/actuator/health | grep UP || exit 1"
-      interval: 10s
+      interval: 20s
       timeout: 5s
-      retries: 10
+      retries: 20
       start_period: 10s
     depends_on:
       rabbit:
@@ -199,18 +429,20 @@ services:
     #  Hence, we define a spring application name
     environment:
       SPRING_APPLICATION_NAME: eurekaserver
+    #  app name for otel to identify
+      OTEL_SERVICE_NAME: "eurekaserver"
 
   gatewayserver:
-    image: "mrlearn/gatewayserver:v1.7"
+    image: "mrlearn/gatewayserver:v1.8"
     container_name: gatewayserver-ms
     ports:
       - "8072:8072"
     #   props to define health check test for eureka server using curl cmd
     healthcheck:
       test: "curl --fail -silent http://localhost:8072/actuator/health | grep UP || exit 1"
-      interval: 10s
+      interval: 20s
       timeout: 5s
-      retries: 10
+      retries: 20
       start_period: 10s
     depends_on:
       accounts:
@@ -235,6 +467,8 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
       SPRING_DATA_REDIS_TIMEOUT: 1s
+    #  app name for otel to identify
+      OTEL_SERVICE_NAME: "gatewayserver"
   rabbit:
     # rabbit requires specifc defined props based on docs
     image: "rabbitmq:3.12-management"

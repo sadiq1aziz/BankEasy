@@ -93,10 +93,10 @@ public class LoansController {
     public ResponseEntity<LoansDto> fetchLoans ( @RequestParam @Pattern(regexp = "^$|[0-9]{10}",
             message = "Mobile number must be 10 digits") String mobileNumber,
                                                  @RequestHeader("bankeasy-correlation-id") String correlationId){
-        logger.debug("bankeasy-correlation-id fetched in loans controller method: {}", correlationId);
+        logger.debug("fetching loans: operation start");
         //use create loan service
         LoansDto loansDto = iLoansService.fetchLoan(mobileNumber);
-
+        logger.debug("fetching loans: operation end");
         //we already handle exception via 500 in the global exception handler class
         //hence only success response handled here
         return ResponseEntity

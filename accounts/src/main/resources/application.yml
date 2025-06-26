@@ -55,6 +55,10 @@ management:
       enabled: true
     liveness-state:
       enabled: true
+# Micrometer configuration to monitor app health
+  metrics:
+    logs:
+      application: ${spring.application.name}
 
 # enable shutdown mechanism
 endpoints:
@@ -89,6 +93,9 @@ logging:
     com:
       bankEasy:
         accounts: DEBUG
+# log pattern for distributed tracing via open telemetry
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
 
 # Config details for circuit breaker to function
 resilience4j.circuitbreaker:
