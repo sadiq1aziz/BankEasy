@@ -27,6 +27,14 @@ spring:
       host: localhost
       port: 6379
       timeout: 1s
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+  # Here, this URI will provide app with public certs from keycloak -> used to validate access token
+  # Note that keycloak will have the private certs to issue the access token
+          jwk-set-uri: "http://localhost:7080/realms/master/protocol/openid-connect/certs"
+
   # We dont have profiles for eureka server as props are the same
   # management API endpoints are specific endpoints provided by spring and
   # utilized via actuator which exposes them for use.
