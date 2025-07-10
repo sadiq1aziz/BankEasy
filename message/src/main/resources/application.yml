@@ -1,0 +1,115 @@
+server:
+ port: 9010
+spring:
+ application:
+  name: "message"
+ mail:
+  host: sandbox.smtp.mailtrap.io
+  port: 587
+  username: ${MAIL_USERNAME}
+  password: ${MAIL_PASSWORD}
+  properties:
+   mail:
+    smtp:
+     auth: true
+     starttls:
+      enable: true
+     ssl:
+      trust: "*"
+# clubs both functions into a single logical entity
+ cloud:
+  function:
+   definition: sendEmailRMQ|sendSmsRMQ
+  stream:
+   bindings:
+# RabbitMQ configuration for defining input bindings to queue
+# This will result in the Message function referenced in the property to listen
+# into the queue at the destination i.e a consumer
+# All events to be processed by the Message function will be provided in this queue
+    sendEmailRMQsendSmsRMQ-in-0:
+# Name of queue
+     destination: send-notification
+# Comms identification
+     group: ${spring.application.name}
+# Send result to outbound exchange for accounts microservice
+    sendEmailRMQsendSmsRMQ-out-0:
+     destination: update-notification
+twilio:
+ accountSid: ${TWILIO_SID}
+ authToken: ${TWILIO_TOKEN}
+ fromNumber: ${TWILIO_NUMBER}
+
+rabbitmq:
+ host: localhost
+ port: 5672
+ username: guest
+ password: guest
+ connection-timeout: 10s
+
+# management API endpoints are specific en  dpoints provided by spring and
+# utilized via actuator which exposes them for use.
+# One function is to perform refresh of configuration read from git post a change
+# without having to restart the microservice
+management:
+ endpoints:
+  web:
+   exposure:
+    include: "*"
+ #  enable actator to expose info url
+ info:
+  env:
+   enabled: true
+ # enable shutdown url of microservice
+ endpoint:
+  shutdown:
+   access: unrestricted
+  health:
+   probes:
+    enabled: true
+
+ health:
+  readiness-state:
+   enabled: true
+  liveness-state:
+   enabled: true
+ # Micrometer configuration to monitor app health
+ metrics:
+  logs:
+   application: ${spring.application.name}
+
+# enable shutdown mechanism
+endpoints:
+ shutdown:
+  enabled: true
+
+# eureka props
+eureka:
+ instance:
+  # This property defines this microservice dynamically wrt Ip address when comms with other ms
+  # Since this is not localhost but rather the accounts microservice instance that we are referring here
+  preferIpAddress: true
+ client:
+  # We require registry details of all microservices for comms
+  fetchRegistry : true
+  # We need this ms instance to be registered with discovery
+  registerWithEureka: true
+  # Default url for eureka connections , can refer the same in eurekaserver config
+  serviceUrl:
+   defaultZone: http://localhost:8070/eureka
+
+# desc info to be exposed via actuator endpoint to distinguish other microservices
+info:
+ app:
+  name: "message"
+  description: "BankEasy microservice for message brokering"
+  version: "1.0.0"
+
+# activate debug logging
+logging:
+ level:
+  com:
+   bankeasy:
+    message: DEBUG
+ # log pattern for distributed tracing via open telemetry
+ pattern:
+  level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"

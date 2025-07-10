@@ -20,4 +20,6 @@ public interface IAccountsService {
     // delete account details based on mobileNumber
     public boolean deleteAccount(String mobileNumber);
 
+    public void updateNotificationStatus(Long accountNumber);
+
 }

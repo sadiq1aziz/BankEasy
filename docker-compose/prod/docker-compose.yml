@@ -282,7 +282,7 @@ services:
       service: microservice-db-configuration
 
   accounts:
-    image: "mrlearn/accounts:v1.9"
+    image: "mrlearn/accounts:v1.10"
     container_name: accounts-ms
     #   ports will be closed as we configure microservice app to communicate only post auth via keycloak
     #   communication will occur only using internal network
@@ -311,7 +311,7 @@ services:
       OTEL_SERVICE_NAME: "accounts"
 
   loans:
-    image: "mrlearn/loans:v1.9"
+    image: "mrlearn/loans:v1.10"
     container_name: loans-ms
     #   ports will be closed as we configure microservice app to communicate only post auth via keycloak
     #   communication will occur only using internal network
@@ -340,7 +340,7 @@ services:
       OTEL_SERVICE_NAME: "loans"
 
   loans1:
-    image: "mrlearn/loans:v1.9"
+    image: "mrlearn/loans:v1.10"
     container_name: loans-ms1
     ports:
       - "8091:8090"
@@ -369,7 +369,7 @@ services:
       OTEL_SERVICE_NAME: "loans1"
 
   cards:
-    image: "mrlearn/cards:v1.9"
+    image: "mrlearn/cards:v1.10"
     container_name: cards-ms
     #   ports will be closed as we configure microservice app to communicate only post auth via keycloak
     #   communication will occur only using internal network
@@ -398,7 +398,7 @@ services:
       OTEL_SERVICE_NAME: "cards"
 
   configserver:
-    image: "mrlearn/configserver:v1.9"
+    image: "mrlearn/configserver:v1.10"
     container_name: configserver-ms
     ports:
       - "8071:8071"
@@ -420,7 +420,7 @@ services:
       OTEL_SERVICE_NAME: "configserver"
 
   eurekaserver:
-    image: "mrlearn/eurekaserver:v1.9"
+    image: "mrlearn/eurekaserver:v1.10"
     container_name: eurekaserver-ms
     ports:
       - "8070:8070"
@@ -447,7 +447,7 @@ services:
       OTEL_SERVICE_NAME: "eurekaserver"
 
   gatewayserver:
-    image: "mrlearn/gatewayserver:v1.9"
+    image: "mrlearn/gatewayserver:v1.10"
     container_name: gatewayserver-ms
     ports:
       - "8072:8072"
@@ -486,7 +486,7 @@ services:
       OTEL_SERVICE_NAME: "gatewayserver"
   rabbit:
     # rabbit requires specifc defined props based on docs
-    image: "rabbitmq:3.12-management"
+    image: "rabbitmq:4-management"
     hostname: rabbitmq
     ports:
       - "5672:5672"
@@ -501,6 +501,22 @@ services:
     extends:
       file: common-config.yml
       service: microservice-network-config
+
+  message:
+    image: "mrlearn/message:v1.10"
+    container_name: message-ms
+    depends_on:
+      rabbit:
+        condition: service_healthy
+    extends:
+      file: common-config.yml
+      service: microservice-deploy-config
+    environment:
+      TWILIO_SID: ${TWILIO_SID}
+      TWILIO_TOKEN: ${TWILIO_TOKEN}
+      TWILIO_NUMBER: ${TWILIO_NUMBER}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
 
 networks:
   bankeasy:

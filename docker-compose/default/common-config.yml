@@ -5,6 +5,7 @@ services:
     networks:
       - bankeasy
 
+
   microservice-deploy-config:
     extends:
       microservice-network-config
@@ -12,23 +13,32 @@ services:
       resources:
         limits:
           memory: 700m
-#   Now we will override the rabbit prop that is defined in the app.yml of each MS
-#   Although the docker compose file doesn't have properties relevant to rabbit for each MS
+    #   Now we will override the rabbit prop that is defined in the app.yml of each MS
+    #   Although the docker compose file doesn't have properties relevant to rabbit for each MS
     environment:
-#   override the hostname via the below prop as defined from docs
+      #   override the hostname via the below prop as defined from docs
       SPRING_RABBITMQ_HOST: "rabbit"
+      #   jar / java agent that peers into JVM and performs at runtime telemetry operations
+      JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent-1.32.0.jar"
+      #   data endpoint to which java agent pushes the trace information
+      #   otel uses 4318 for http connection , 4317 for gRPC
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4317
+      #   since metric info is scraped via prometheus
+      OTEL_LOGS_EXPORTER: none
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+      OTEL_LOG_LEVEL: debug
 
   microservice-configserver-config:
     extends:
       microservice-deploy-config
     environment:
-#   no optional preceeding URL as we need service to fail if config server not booted
-#   URL will point to the config server name on port 8071
-#   format -> configserver:http://servicename:port wherein service name in this context is accounts, loans etc
+      #   no optional preceeding URL as we need service to fail if config server not booted
+      #   URL will point to the config server name on port 8071
+      #   format -> configserver:http://servicename:port wherein service name in this context is accounts, loans etc
       SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071/"
       SPRING_PROFILES_ACTIVE: default
-#   These properties are required for every microservice app to connect to the sql server
-#   Hence we add under the config server common config which is extended to every app microservice
+      #   These properties are required for every microservice app to connect to the sql server
+      #   Hence we add under the config server common config which is extended to every app microservice
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
 
@@ -39,13 +49,13 @@ services:
       eurekaserver:
         condition: service_healthy
     environment:
-#  expose the uri for microservices to connect to eureka
+      #  expose the uri for microservices to connect to eureka
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka
 
   microservice-db-configuration:
     image: "mysql"
     extends:
-#  We dont restrict memory here , hence we use network instead of deploy config
+      #  We dont restrict memory here , hence we use network instead of deploy config
       microservice-network-config
     healthcheck:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
@@ -53,5 +63,5 @@ services:
       timeout: 10s
       retries: 10
     environment:
-#  Environmental variables with which we create the docker container for sql
+      #  Environmental variables with which we create the docker container for sql
       MYSQL_ROOT_PASSWORD: root

@@ -1,8 +1,10 @@
 package com.bankEasy.accounts.service.impl;
 
 import com.bankEasy.accounts.dto.AccountsDto;
+import com.bankEasy.accounts.dto.AccountsMessageDto;
 import com.bankEasy.accounts.dto.CustomerDto;
 import com.bankEasy.accounts.entity.Accounts;
+import com.bankEasy.accounts.enums.NotificationStatus;
 import com.bankEasy.accounts.exceptions.CustomerAlreadyExistsException;
 import com.bankEasy.accounts.exceptions.ResourceNotFoundException;
 import com.bankEasy.accounts.mapper.AccountsMapper;
@@ -13,6 +15,9 @@ import com.bankEasy.accounts.service.IAccountsService;
 import com.bankEasy.accounts.constants.AccountsConstants;
 import com.bankEasy.accounts.entity.Customer;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,9 +29,12 @@ import java.util.Random;
 @AllArgsConstructor
 public class AccountServiceImpl implements IAccountsService {
 
+    private static final Logger logger = LoggerFactory.getLogger(AccountServiceImpl.class);
+
     //include Repositories as needed
     private AccountsRepository accountsRepository;
     private CustomerRepository customerRepository;
+    private StreamBridge streamBridge;
 
     @Override
     public void createAccount(CustomerDto customerDto) {
@@ -49,7 +57,15 @@ public class AccountServiceImpl implements IAccountsService {
         //use Spring JPA to persist data into DB and obtain on return the customer object
         //populated with the ID that is auto gen in the DB via JPA framework
         Customer savedCustomer = customerRepository.save(customerEntity);
-        accountsRepository.save(createNewAccount(savedCustomer));
+        Accounts savedAccount = accountsRepository.save(createNewAccount(savedCustomer));
+        sendNotification(savedAccount, savedCustomer);
+    }
+
+    public void sendNotification(Accounts account, Customer customer){
+        var accountsMessageDto = new AccountsMessageDto(account.getAccountNumber(), customer.getEmail(), customer.getName(), customer.getMobileNumber());
+        logger.info("Sending Notification to customer: {}", customer.getCustomerId());
+        var sentStatus = streamBridge.send("sendNotification-out-0", accountsMessageDto);
+        logger.info("Notification status: {}", sentStatus);
     }
 
     @Override
@@ -116,6 +132,17 @@ public class AccountServiceImpl implements IAccountsService {
         return  true;
     }
 
+    @Override
+    public void updateNotificationStatus(Long accountNumber) {
+        Optional<Accounts> customerAccount = accountsRepository.findByAccountNumber(accountNumber);
+        if (!customerAccount.isPresent()) {
+            throw new ResourceNotFoundException("Account", "ID", accountNumber.toString());
+        }
+        customerAccount.get().setNotificationStatus(NotificationStatus.SENT);
+        accountsRepository.save(customerAccount.get());
+        logger.info("Notification status updated for Customer with account: {}", accountNumber);
+    }
+
 
     private Accounts createNewAccount(Customer customer) {
         //create an account for the user
@@ -131,6 +158,7 @@ public class AccountServiceImpl implements IAccountsService {
         account.setBranchAddress(AccountsConstants.ADDRESS);
         account.setCreatedAt(LocalDateTime.now());
         account.setCreatedBy("Bank");
+        account.setNotificationStatus(NotificationStatus.UNSENT);
         return account;
     }
 }

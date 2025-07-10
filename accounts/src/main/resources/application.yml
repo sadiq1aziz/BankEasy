@@ -29,7 +29,16 @@ spring:
     openfeign:
       circuitbreaker:
         enabled: true
-# management API endpoints are specific endpoints provided by spring and
+    function:
+      definition: processNotificationStatus
+    stream:
+      bindings:
+        processNotificationStatus-in-0:
+          destination: update-notification
+          group: ${spring.application.name}
+        sendNotification-out-0:
+          destination: send-notification
+# management API endpoints are specific en  dpoints provided by spring and
 # utilized via actuator which exposes them for use.
 # One function is to perform refresh of configuration read from git post a change
 # without having to restart the microservice

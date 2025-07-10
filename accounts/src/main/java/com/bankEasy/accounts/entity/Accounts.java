@@ -1,9 +1,8 @@
 package com.bankEasy.accounts.entity;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import com.bankEasy.accounts.enums.NotificationStatus;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -23,5 +22,9 @@ public class Accounts extends BaseEntity{
 
     @Column(name = "account_type")
     private String accountType;
+
+    @Column(name = "notification_status")
+    @Enumerated(EnumType.STRING)
+    private NotificationStatus notificationStatus;
 
 }

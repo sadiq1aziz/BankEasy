@@ -32,3 +32,8 @@ scrape_configs:
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: [ 'configserver-ms:8071' ]
+
+  - job_name: 'message-ms'
+    metrics_path: '/actuator/message'
+    static_configs:
+      - targets: [ 'configserver-ms:8071' ]
