@@ -1,6 +1,5 @@
 package com.bankEasy.accounts.service.impl;
 
-import com.bankEasy.accounts.controller.CustomerDetailsController;
 import com.bankEasy.accounts.dto.*;
 import com.bankEasy.accounts.entity.Accounts;
 import com.bankEasy.accounts.exceptions.ResourceNotFoundException;
@@ -11,15 +10,12 @@ import com.bankEasy.accounts.repository.AccountsRepository;
 import com.bankEasy.accounts.repository.CustomerRepository;
 import com.bankEasy.accounts.service.ICustomerService;
 import com.bankEasy.accounts.service.client.CardsFeignClient;
-import com.bankEasy.accounts.service.client.LoansFallback;
 import com.bankEasy.accounts.service.client.LoansFeignClient;
 
 import com.bankEasy.accounts.entity.Customer;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 

@@ -30,5 +30,8 @@ public interface ICardService{
      * @param mobileNumber
      */
     public boolean deleteCard (String mobileNumber);
+
+    public void updateCardNotificationStatus(String cardNumber);
+
 }
   

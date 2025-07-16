@@ -85,9 +85,10 @@ public class AccountsController {
     @GetMapping("/fetch")
     public ResponseEntity<CustomerDto> fetchAccount ( @RequestParam  @Pattern(regexp = "(^$|[0-9]{10})", message = "valid customer mobile number required") String mobileNumber){
 
+        logger.info("Fetching Account of customer with mobile number: {}", mobileNumber);
         //invoke service for business logic
         CustomerDto customerDto = iAccountsService.fetchAccount(mobileNumber);
-
+        logger.info("Account Details successfully retrieved");
 
         return ResponseEntity
                 .status(HttpStatus.OK)

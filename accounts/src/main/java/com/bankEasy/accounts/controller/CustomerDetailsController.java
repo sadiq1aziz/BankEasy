@@ -57,7 +57,7 @@ public class CustomerDetailsController {
             message = "Mobile number must be 10 digits") String mobileNumber) {
         logger.debug("fetching customer details: operation start");
         CustomerDetailsDto customerDetailsDto = iCustomerService.fetchCustomerDetails(mobileNumber, correlationId);
-        logger.debug("fetching customer details: opeation complete");
+        logger.debug("fetching customer details: operation complete");
         return new ResponseEntity<>(customerDetailsDto, HttpStatus.FOUND);
     }
 }

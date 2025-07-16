@@ -27,6 +27,7 @@ services:
       OTEL_LOGS_EXPORTER: none
       OTEL_EXPORTER_OTLP_PROTOCOL: grpc
       OTEL_LOG_LEVEL: debug
+      OTEL_METRICS_EXPORTER: none 
 
   microservice-configserver-config:
     extends:

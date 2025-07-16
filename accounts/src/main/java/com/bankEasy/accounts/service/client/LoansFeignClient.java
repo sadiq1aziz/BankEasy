@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface LoansFeignClient {
 
     //mapping and return types to match the actual target microservice controller method
+    //We require the correlation Id to trace inter microservice call dependencies
     @GetMapping(value = "/api/fetch-loan",consumes = "application/json")
     public ResponseEntity<LoansDto> fetchLoan (@RequestParam String mobileNumber, @RequestHeader("bankeasy-correlation-id") String correlationId);
 }

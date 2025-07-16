@@ -1,6 +1,7 @@
 package com.bankeasy.message.service.impl;
 
 import com.bankeasy.message.dto.AccountsMessageDto;
+import com.bankeasy.message.dto.CardsMessageDto;
 import com.bankeasy.message.service.IEmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,16 @@ public class EmailServiceImpl implements IEmailService {
         message.setSubject("BankEasy Email Notification");
         message.setText("Hello! Your account " + accountsMessageDto.accountNumber() + " was processed.");
         mailSender.send(message);
-        logger.debug("Email sent");
+        logger.debug("Email sent for customer account");
+    }
+
+    @Override
+    public void sendCardEmail(CardsMessageDto cardsMessageDto) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(cardsMessageDto.email());
+        message.setSubject("BankEasy Email Notification");
+        message.setText("Hello! Your card " + cardsMessageDto.cardNumber() + " was processed.");
+        mailSender.send(message);
+        logger.debug("Email sent for customer card");
     }
 }

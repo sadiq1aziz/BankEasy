@@ -125,7 +125,7 @@
 				<version>3.4.5</version>
 				<configuration>
 					<to>
-						<image>mrlearn/${project.artifactId}:v1.10</image>
+						<image>mrlearn/${project.artifactId}:v1.11</image>
 					</to>
 				</configuration>
 			</plugin>

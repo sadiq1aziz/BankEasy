@@ -2,6 +2,7 @@ package com.bankeasy.message.service.impl;
 
 import com.bankeasy.message.config.SmsConfig;
 import com.bankeasy.message.dto.AccountsMessageDto;
+import com.bankeasy.message.dto.CardsMessageDto;
 import com.bankeasy.message.functions.MessageFunctions;
 import com.bankeasy.message.service.ISmsService;
 import com.twilio.rest.api.v2010.account.Message;
@@ -28,6 +29,16 @@ public class SmsServiceImpl implements ISmsService {
                 new PhoneNumber(config.getFromNumber()),                      // Twilio registered sender number
                 "Hello! Your account " + accountsMessageDto.accountNumber() + " was processed."                                  // SMS content
         ).create();
-        logger.debug("Sms sent");
+        logger.debug("Sms sent for customer account");
+    }
+
+    @Override
+    public void sendCardSms(CardsMessageDto cardsMessageDto) {
+        Message.creator(
+                new PhoneNumber("+91"+cardsMessageDto.mobileNumber().toString()),                      // Destination number
+                new PhoneNumber(config.getFromNumber()),                      // Twilio registered sender number
+                "Hello! Your card " + cardsMessageDto.cardNumber() + " was processed."                                  // SMS content
+        ).create();
+        logger.debug("Sms sent for customer card");
     }
 }

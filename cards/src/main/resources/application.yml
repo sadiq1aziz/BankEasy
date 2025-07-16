@@ -27,6 +27,29 @@ spring:
     port: 5672
     username: "guest"
     password: "guest"
+# root binder to kafka
+  kafka:
+    bootstrap-servers: localhost:9092
+# Config details for circuitbreaker to work for openfeign in accounts
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+    function:
+      definition: processCardNotificationStatus
+    stream:
+      binders:
+        kafka:
+          type: kafka
+      bindings:
+        processCardNotificationStatus-in-0:
+          destination: update-card-notification-topic
+          binder: kafka
+          group: ${spring.application.name}
+        send-card-notification-out-0:
+          destination: send-card-notification-topic
+          binder: kafka
+          group: ${spring.application.name}
 # management API endpoints are specific endpoints provided by spring and
 # utilized via actuator which exposes them for use.
 # One function is to perform refresh of configuration read from git post a change
@@ -88,9 +111,21 @@ info:
 # activate debug logging
 logging:
   level:
+    feign: DEBUG
+    org:
+      springframework:
+        cloud:
+          openfeign: DEBUG
     com:
       bankeasy:
         cards: DEBUG
 # log pattern for distributed tracing via open telemetry
   pattern:
     level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+
+# add config to ensure resilience 4j allows feign time to connect
+resilience4j:
+  timelimiter:
+    instances:
+      AccountsFeignClientfetchAccountString:
+        timeoutDuration: 5s

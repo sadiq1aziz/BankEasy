@@ -16,11 +16,29 @@ spring:
       enable: true
      ssl:
       trust: "*"
+# root binder to kafka
+ kafka:
+  bootstrap-servers: localhost:9092
 # clubs both functions into a single logical entity
  cloud:
   function:
-   definition: sendEmailRMQ|sendSmsRMQ
+   definition: sendEmailRMQ|sendSmsRMQ; sendEmailKafka|sendSmsKafka
   stream:
+# multi binder configuration,  kafka picksup config from parent
+# rabbit works on top of spring amqp, requires locally scoped env configs for binder to work
+   binders:
+    kafka:
+     type: kafka
+    rabbitmq:
+     type: rabbit
+     environment:
+      spring:
+       rabbitmq:
+        host: localhost
+        port: 5672
+        username: guest
+        password: guest
+        connection-timeout: 10s
    bindings:
 # RabbitMQ configuration for defining input bindings to queue
 # This will result in the Message function referenced in the property to listen
@@ -29,11 +47,23 @@ spring:
     sendEmailRMQsendSmsRMQ-in-0:
 # Name of queue
      destination: send-notification
+     binder: rabbitmq
 # Comms identification
      group: ${spring.application.name}
 # Send result to outbound exchange for accounts microservice
     sendEmailRMQsendSmsRMQ-out-0:
      destination: update-notification
+# define which async messaging platform to use
+     binder: rabbitmq
+    sendEmailKafkasendSmsKafka-in-0:
+     destination: send-card-notification-topic
+     binder: kafka
+     group: ${spring.application.name}
+    sendEmailKafkasendSmsKafka-out-0:
+     destination: update-card-notification-topic
+     binder: kafka
+     group: ${spring.application.name}
+
 twilio:
  accountSid: ${TWILIO_SID}
  authToken: ${TWILIO_TOKEN}

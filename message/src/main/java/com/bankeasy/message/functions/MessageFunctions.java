@@ -1,6 +1,7 @@
 package com.bankeasy.message.functions;
 
 import com.bankeasy.message.dto.AccountsMessageDto;
+import com.bankeasy.message.dto.CardsMessageDto;
 import com.bankeasy.message.service.IEmailService;
 import com.bankeasy.message.service.ISmsService;
 import lombok.RequiredArgsConstructor;
@@ -79,4 +80,31 @@ public class MessageFunctions {
         };
     }
 
+    /**
+     * Using kafka for these functions
+     * @return
+     */
+    @Bean
+    Function<CardsMessageDto, CardsMessageDto> sendEmailKafka() {
+        return cardsMessageDto -> {
+            logger.info("Kafka - Sending  email for customer with email: {}", cardsMessageDto.email());
+            emailService.sendCardEmail(cardsMessageDto);
+            return cardsMessageDto;
+        };
+    }
+
+
+    /**
+     *
+     * Using kafka for these functions
+     * @return
+     */
+    @Bean
+    public Function<CardsMessageDto, String> sendSmsKafka() {
+        return cardsMessageDto -> {
+            logger.info("Kafka - Sending Sms for customer with phone: {}", cardsMessageDto.mobileNumber());
+            smsService.sendCardSms(cardsMessageDto);
+            return cardsMessageDto.cardNumber();
+        };
+    }
 }

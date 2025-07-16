@@ -1,14 +1,4 @@
-package com.bankEasy.accounts.service.client;
-
-import com.bankEasy.accounts.dto.CardsDto;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Pattern;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
-
+package com.bankeasy.cards.service.clients;
 // Here the goal is to obtain instance details mentioned in the feign client via eureka
 // we use declarative programming similar to JPA repo, wherein only abstract details
 // are provided rather than impl code
@@ -22,12 +12,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 //Note : all client interfaces will be invoked from parent invoker method which is defined in interface under service
 
+import com.bankeasy.cards.dto.CustomerDto;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+
 //Here since we are implementing the fallback mechanism as part of CB pattern, we add the metadata reference
-@FeignClient(name = "cards", fallback = CardsFallback.class)
-public interface CardsFeignClient {
+//@FeignClient(name = "accounts", fallbackFactory  = AccountsFallbackFactory.class)
+@FeignClient(name = "accounts", fallback  = AccountsFallback.class)
+public interface AccountsFeignClient {
 
     //mapping and return types to match the actual target microservice controller method
-    //We require the correlation Id to trace inter microservice call dependencies
-    @GetMapping(value = "/api/fetch",consumes = "application/json")
-    public ResponseEntity<CardsDto> fetchCard (@RequestParam String mobileNumber, @RequestHeader("bankeasy-correlation-id") String correlationId);
+    @GetMapping(value = "/api/fetch", consumes = "application/json")
+    public ResponseEntity<CustomerDto> fetchAccount ( @RequestParam String mobileNumber);
 }
