@@ -1,0 +1,39 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+deploymentName: accounts-deployment
+serviceName: accounts
+appLabel: accounts
+appName: accounts
+
+replicaCount: 1
+
+image:
+  repository: mrlearn/accounts
+  tag: v1.11
+
+containerPort: 8080
+
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://accountsdb-mysql.default.svc.cluster.local:3306/accountsdb
+    username: root
+    password: root
+
+enable_sql: true
+appname_enabled: true
+profile_enabled: true
+config_enabled: true
+eureka_enabled: true
+resouceserver_enabled: false
+otel_enabled: true
+rabbit_enabled: true
+kafka_enabled: false
+redis_enabled: false
+messageconfig_enabled: false
+enable_notifications: false

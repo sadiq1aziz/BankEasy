@@ -1,0 +1,33 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+deploymentName: configserver-deployment
+serviceName: configserver
+appLabel: configserver
+appName: configserver
+
+replicaCount: 1
+
+image:
+  repository: mrlearn/configserver
+  tag: v1.11
+
+containerPort: 8071
+
+service:
+  type: ClusterIP
+  port: 8071
+  targetPort: 8071
+
+enable_sql: false
+appname_enabled: true
+profile_enabled: false
+config_enabled: false
+eureka_enabled: false
+resouceserver_enabled: false
+otel_enabled: true
+rabbit_enabled: true
+kafka_enabled: false
+redis_enabled: false
+messageconfig_enabled: false
+enable_notifications: false

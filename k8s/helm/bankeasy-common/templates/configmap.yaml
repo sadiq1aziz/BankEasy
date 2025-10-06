@@ -1,0 +1,29 @@
+{{- define "common.configmap" -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.global.configMapName }}
+data:
+  SPRING_PROFILES_ACTIVE: "{{ .Values.global.activeProfile }}"
+  SPRING_CONFIG_IMPORT: "{{ .Values.global.configServerURL }}"
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "{{ .Values.global.eurekaServerURL }}"
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK-SET-URI: "{{ .Values.global.keyCloakURL }}"
+  JAVA_TOOL_OPTIONS: "{{ .Values.global.openTelemetryJavaAgent }}"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "{{ .Values.global.otelExporterEndPoint }}"
+  OTEL_METRICS_EXPORTER: "{{ .Values.global.otelMetricsExporter }}"
+  OTEL_LOG_LEVEL: "{{ .Values.global.otelLogLevel }}"
+  OTEL_LOGS_EXPORTER: "{{ .Values.global.otelLogsExporter }}"
+  OTEL_EXPORTER_OTLP_PROTOCOL: "{{ .Values.global.otelExporterOtlpProtocol }}"
+  SPRING_RABBITMQ_HOST: "{{ .Values.global.springRabbitmqHost }}"
+  SPRING_RABBITMQ_PORT: "{{ .Values.global.springRabbitmqPort }}"
+  SPRING_RABBITMQ_USERNAME: "{{ .Values.global.springRabbitmqUsername }}"
+  SPRING_RABBITMQ_PASSWORD: "{{ .Values.global.springRabbitmqPassword }}"
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: "{{ .Values.global.springKafkaBootstrapServers }}"
+  SPRING_DATA_REDIS_CONNECT_TIMEOUT: "{{ .Values.global.springDataRedisConnectTimeout }}"
+  SPRING_DATA_REDIS_HOST: "{{ .Values.global.springDataRedisHost }}"
+  SPRING_DATA_REDIS_PORT: "{{ .Values.global.springDataRedisPort }}"
+  SPRING_DATA_REDIS_TIMEOUT: "{{ .Values.global.springDataRedisTimeout }}"
+  SPRING_CLOUD_STREAM_BINDERS_RABBITMQ_ENVIRONMENT_SPRING_RABBITMQ_HOST: "{{ .Values.global.springCloudStreamBindersRabbitmqEnvironmentSpringRabbitmqHost }}"
+  SPRING_CLOUD_STREAM_BINDERS_RABBITMQ_ENVIRONMENT_SPRING_RABBITMQ_USERNAME: "{{ .Values.global.springCloudStreamBindersRabbitmqEnvironmentSpringRabbitmqUsername }}"
+  SPRING_CLOUD_STREAM_BINDERS_RABBITMQ_ENVIRONMENT_SPRING_RABBITMQ_PASSWORD: "{{ .Values.global.springCloudStreamBindersRabbitmqEnvironmentSpringRabbitmqPassword }}"
+{{- end -}}

@@ -1,0 +1,23 @@
+global:
+  configMapName: bankeasyqa-configmap
+  activeProfile: qa
+  configServerURL: configserver:http://configserver:8071/
+  eurekaServerURL: http://eurekaserver:8070/eureka/
+  keyCloakURL: http://keycloak.default.svc.cluster.local:80/realms/master/protocol/openid-connect/certs
+  openTelemetryJavaAgent: "-javaagent:/app/libs/opentelemetry-javaagent-1.32.0.jar"
+  otelExporterEndPoint: http://tempo-grafana-tempo-distributor:4317
+  otelMetricsExporter: none
+  otelLogLevel: Debug
+  otelExporterOtlpProtocol: grpc
+  otelLogsExporter: none
+  springRabbitmqHost: "rabbit"
+  springKafkaBootstrapServers: kafka-controller-0.kafka-controller-headless.default.svc.cluster.local:9092
+  springDataRedisConnectTimeout: 3s
+  springDataRedisHost: redis
+  springDataRedisPort: 6379
+  springDataRedisTimeout: 3s
+  springCloudStreamBindersRabbitmqEnvironmentSpringRabbitmqHost: rabbitmq.default.svc.cluster.local
+  springCloudStreamBindersRabbitmqEnvironmentSpringRabbitmqUsername: username
+  springCloudStreamBindersRabbitmqEnvironmentSpringRabbitmqPassword: password
+#  kafkaBrokerURL: kafka-controller-0.kafka-controller-headless.default.svc.cluster.local:9092
+#  consider Twilio, mail, and rabbit config for message

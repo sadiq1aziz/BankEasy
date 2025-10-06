@@ -5,7 +5,6 @@ services:
     networks:
       - bankeasy
 
-
   microservice-deploy-config:
     extends:
       microservice-network-config
@@ -16,18 +15,18 @@ services:
     #   Now we will override the rabbit prop that is defined in the app.yml of each MS
     #   Although the docker compose file doesn't have properties relevant to rabbit for each MS
     environment:
-    #   override the hostname via the below prop as defined from docs
+      #   override the hostname via the below prop as defined from docs
       SPRING_RABBITMQ_HOST: "rabbit"
-    #   jar / java agent that peers into JVM and performs at runtime telemetry operations
+      #   jar / java agent that peers into JVM and performs at runtime telemetry operations
       JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent-1.32.0.jar"
-    #   data endpoint to which java agent pushes the trace information
-    #   otel uses 4318 for http connection , 4317 for gRPC
+      #   data endpoint to which java agent pushes the trace information
+      #   otel uses 4318 for http connection , 4317 for gRPC
       OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4317
-    #   since metric info is scraped via prometheus
+      #   since metric info is scraped via prometheus
       OTEL_LOGS_EXPORTER: none
       OTEL_EXPORTER_OTLP_PROTOCOL: grpc
       OTEL_LOG_LEVEL: debug
-      OTEL_METRICS_EXPORTER: none 
+      OTEL_METRICS_EXPORTER: none
 
   microservice-configserver-config:
     extends:
@@ -37,7 +36,7 @@ services:
       #   URL will point to the config server name on port 8071
       #   format -> configserver:http://servicename:port wherein service name in this context is accounts, loans etc
       SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071/"
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: qa
       #   These properties are required for every microservice app to connect to the sql server
       #   Hence we add under the config server common config which is extended to every app microservice
       SPRING_DATASOURCE_USERNAME: root
