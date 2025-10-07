@@ -23,36 +23,36 @@
 ```mermaid
 graph TB
     subgraph client["Client Layer"]
-        web[Web/Mobile Client]
+        web["Web / Mobile Client"]
     end
 
     subgraph k8s["Kubernetes Cluster"]
         subgraph services["Microservices"]
-            gw[Gateway<br/>:8072]
-            accounts[Accounts<br/>:8080]
-            cards[Cards<br/>:9000]
-            loans[Loans<br/>:8090]
-            message[Message<br/>:9010]
+            gw["Gateway :8072"]
+            accounts["Accounts :8080"]
+            cards["Cards :9000"]
+            loans["Loans :8090"]
+            message["Message :9010"]
         end
 
         subgraph infra["Service Infrastructure"]
-            eureka[Eureka Server<br/>:8761]
-            config[Config Server<br/>:8071<br/>(Git-backed)]
-            bus[(Spring Cloud Bus<br/>via Kafka/RabbitMQ)]
+            eureka["Eureka Server :8761"]
+            config["Config Server :8071\nGit-backed"]
+            bus["Spring Cloud Bus\n(Kafka / RabbitMQ)"]
         end
 
         subgraph data["Data Layer"]
-            mysql[(MySQL)]
-            kafka[(Kafka Cluster<br/>x3 Brokers)]
-            rabbitmq[(RabbitMQ)]
-            redis[(Redis Cache)]
+            mysql["MySQL"]
+            kafka["Kafka Cluster"]
+            rabbitmq["RabbitMQ"]
+            redis["Redis Cache"]
         end
 
         subgraph obs["Observability Stack"]
-            grafana[Grafana]
-            prometheus[Prometheus]
-            loki[Loki (Logs)]
-            tempo[Tempo (Tracing)]
+            grafana["Grafana"]
+            prometheus["Prometheus"]
+            loki["Loki (Logs)"]
+            tempo["Tempo (Tracing)"]
         end
     end
 
@@ -69,8 +69,8 @@ graph TB
     message -.registers.-> eureka
 
     %% Config propagation
-    config -.reads configs from Git Repo.-> git[(Config Git Repo)]
-    config -.on /busrefresh POST.-> bus
+    config -.reads configs from Git Repo.-> git["Config Git Repo"]
+    config -.POST /busrefresh.-> bus
     bus -.broadcast refresh event.-> accounts & cards & loans & message
 
     %% Service-to-service calls
@@ -81,7 +81,7 @@ graph TB
     accounts --> rabbitmq --> message
 
     %% External notifications
-    message --> external[Email/SMS<br/>(Twilio & Mail)]
+    message --> external["Email / SMS via Twilio"]
 
     %% Persistence & cache
     accounts --> mysql
@@ -108,4 +108,3 @@ graph TB
     style redis fill:#e06666,stroke:#b22222,stroke-width:1px
     style bus fill:#ccffcc,stroke:#009933,stroke-width:1px
     style grafana fill:#ffd966,stroke:#cc9900,stroke-width:1px
-
