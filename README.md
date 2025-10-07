@@ -24,7 +24,7 @@
 graph TB
     %% ==== CLIENT LAYER ====
     subgraph Client["Client Layer"]
-        Web[Web / Mobile Client]
+        Web["Web / Mobile Client"]
     end
 
     %% ==== KUBERNETES CLUSTER ====
@@ -32,30 +32,30 @@ graph TB
         
         %% ==== INFRASTRUCTURE ====
         subgraph Infra["Infrastructure"]
-            Eureka[Eureka Server :8761]
-            Config[Config Server :8071 (Git-backed)]
+            Eureka["Eureka Server :8761"]
+            Config["Config Server :8071 (Git backed)"]
         end
 
         %% ==== SERVICES ====
         subgraph Services["Microservices"]
-            Gateway[API Gateway :8072]
-            Accounts[Accounts Service :8080]
-            Cards[Cards Service :9000]
-            Loans[Loans Service :8090]
-            Message[Message Service :9010]
+            Gateway["API Gateway :8072"]
+            Accounts["Accounts Service :8080"]
+            Cards["Cards Service :9000"]
+            Loans["Loans Service :8090"]
+            Message["Message Service :9010"]
         end
 
         %% ==== DATA LAYER ====
         subgraph Data["Data Layer"]
-            MySQL[(MySQL Databases)]
-            Kafka[(Kafka Cluster ×3 Brokers)]
-            RabbitMQ[(RabbitMQ Queue)]
-            Redis[(Redis Cache)]
+            MySQL["MySQL Databases"]
+            Kafka["Kafka Cluster (3 Brokers)"]
+            RabbitMQ["RabbitMQ Queue"]
+            Redis["Redis Cache"]
         end
 
         %% ==== OBSERVABILITY ====
         subgraph Obs["Observability"]
-            Grafana[(Grafana Stack)]
+            Grafana["Grafana Stack"]
         end
     end
 
@@ -65,12 +65,12 @@ graph TB
     Gateway --> Cards
     Gateway --> Loans
 
-    Accounts -. Feign Client .-> Cards
-    Accounts -. Feign Client .-> Loans
+    Accounts -. "Feign Client" .-> Cards
+    Accounts -. "Feign Client" .-> Loans
 
     Cards --> Kafka --> Message
     Accounts --> RabbitMQ --> Message
-    Message --> External[External Email/SMS APIs]
+    Message --> External["External Email / SMS APIs"]
 
     %% ==== COLOR STYLING ====
     style Kafka fill:#f8d7da,stroke:#b30000
