@@ -22,89 +22,66 @@
 ## 🏗️ Architecture Overview
 ```mermaid
 graph TB
-    subgraph client["Client Layer"]
-        web["Web / Mobile Client"]
+    %% ==== CLIENT LAYER ====
+    subgraph Client["Client Layer"]
+        Web[Web / Mobile Client]
     end
 
-    subgraph k8s["Kubernetes Cluster"]
-        subgraph services["Microservices"]
-            gw["Gateway :8072"]
-            accounts["Accounts :8080"]
-            cards["Cards :9000"]
-            loans["Loans :8090"]
-            message["Message :9010"]
+    %% ==== KUBERNETES CLUSTER ====
+    subgraph K8s["Kubernetes Cluster"]
+        
+        %% ==== INFRASTRUCTURE ====
+        subgraph Infra["Infrastructure"]
+            Eureka[Eureka Server :8761]
+            Config[Config Server :8071 (Git-backed)]
         end
 
-        subgraph infra["Service Infrastructure"]
-            eureka["Eureka Server :8761"]
-            config["Config Server :8071\nGit-backed"]
-            bus["Spring Cloud Bus\n(Kafka / RabbitMQ)"]
+        %% ==== SERVICES ====
+        subgraph Services["Microservices"]
+            Gateway[API Gateway :8072]
+            Accounts[Accounts Service :8080]
+            Cards[Cards Service :9000]
+            Loans[Loans Service :8090]
+            Message[Message Service :9010]
         end
 
-        subgraph data["Data Layer"]
-            mysql["MySQL"]
-            kafka["Kafka Cluster"]
-            rabbitmq["RabbitMQ"]
-            redis["Redis Cache"]
+        %% ==== DATA LAYER ====
+        subgraph Data["Data Layer"]
+            MySQL[(MySQL Databases)]
+            Kafka[(Kafka Cluster ×3 Brokers)]
+            RabbitMQ[(RabbitMQ Queue)]
+            Redis[(Redis Cache)]
         end
 
-        subgraph obs["Observability Stack"]
-            grafana["Grafana"]
-            prometheus["Prometheus"]
-            loki["Loki (Logs)"]
-            tempo["Tempo (Tracing)"]
+        %% ==== OBSERVABILITY ====
+        subgraph Obs["Observability"]
+            Grafana[(Grafana Stack)]
         end
     end
 
-    %% Client interactions
-    web --> gw
+    %% ==== FLOWS ====
+    Web --> Gateway
+    Gateway --> Accounts
+    Gateway --> Cards
+    Gateway --> Loans
 
-    %% Service routing via API Gateway
-    gw --> accounts & cards & loans
+    Accounts -. Feign Client .-> Cards
+    Accounts -. Feign Client .-> Loans
 
-    %% Service Discovery
-    accounts -.registers.-> eureka
-    cards -.registers.-> eureka
-    loans -.registers.-> eureka
-    message -.registers.-> eureka
+    Cards --> Kafka --> Message
+    Accounts --> RabbitMQ --> Message
+    Message --> External[External Email/SMS APIs]
 
-    %% Config propagation
-    config -.reads configs from Git Repo.-> git["Config Git Repo"]
-    config -.POST /busrefresh.-> bus
-    bus -.broadcast refresh event.-> accounts & cards & loans & message
-
-    %% Service-to-service calls
-    accounts -.Feign.-> cards & loans
-
-    %% Async communication
-    cards --> kafka --> message
-    accounts --> rabbitmq --> message
-
-    %% External notifications
-    message --> external["Email / SMS via Twilio"]
-
-    %% Persistence & cache
-    accounts --> mysql
-    cards --> mysql
-    loans --> mysql
-    message --> mysql
-    accounts --> redis
-    cards --> redis
-    loans --> redis
-
-    %% Observability connections
-    accounts --> prometheus
-    cards --> prometheus
-    loans --> prometheus
-    message --> prometheus
-    prometheus --> grafana
-    loki --> grafana
-    tempo --> grafana
-
-    %% Styling
-    style kafka fill:#ff9999,stroke:#cc0000,stroke-width:1px
-    style rabbitmq fill:#ff9933,stroke:#cc6600,stroke-width:1px
-    style mysql fill:#4da6ff,stroke:#0066cc,stroke-width:1px
-    style redis fill:#e06666,stroke:#b22222,stroke-width:1px
-    style bus fill:#ccffcc,stroke:#009933,stroke-width:1px
-    style grafana fill:#ffd966,stroke:#cc9900,stroke-width:1px
+    %% ==== COLOR STYLING ====
+    style Kafka fill:#f8d7da,stroke:#b30000
+    style RabbitMQ fill:#f6b26b,stroke:#cc6600
+    style MySQL fill:#a4c2f4,stroke:#1155cc
+    style Redis fill:#e06666,stroke:#990000
+    style Grafana fill:#ffe599,stroke:#b8860b
+    style Config fill:#c9daf8,stroke:#1155cc
+    style Eureka fill:#d9ead3,stroke:#38761d
+    style Gateway fill:#d5a6bd,stroke:#741b47
+    style Accounts fill:#b4a7d6,stroke:#351c75
+    style Cards fill:#b4a7d6,stroke:#351c75
+    style Loans fill:#b4a7d6,stroke:#351c75
+    style Message fill:#ead1dc,stroke:#a61c00
