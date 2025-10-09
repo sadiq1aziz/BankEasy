@@ -59,12 +59,3 @@
 **CI/CD:** GitHub Actions, Jenkins
 
 ---
-
-## Quick Start (dev)
-
-```bash
-# example - run locally with docker-compose (dev)
-docker-compose -f docker-compose.dev.yml up --build
-
-# or use Helm for k8s (cluster must be available)
-helm upgrade --install bankeasy ./k8s/helm -n bankeasy --create-namespace
