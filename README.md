@@ -25,15 +25,14 @@
 
 ## 🏗️ Architecture Overview
 
-<div align="center" style="background-color:#0d1117; padding:14px; border-radius:10px;">
-  <!-- Zoomable, clickable SVG embed for GitHub README -->
-  <a href="./assets/Bankeasy.svg" target="_blank" rel="noopener">
-    <img src="./assets/Bankeasy.svg" alt="BankEasy Architecture" style="width:100%; max-width:1100px; display:block; border-radius:8px;">
+<div align="center" style="background-color:#0d1117; padding:16px; border-radius:12px;">
+  <a href="https://raw.githubusercontent.com/sadiq1aziz/BankEasy/c6a5e809ab01a04c39e2b9187518ee11e35f6d1c/assets/Bankeasy.svg" target="_blank" rel="noopener">
+    <img src="https://raw.githubusercontent.com/sadiq1aziz/BankEasy/c6a5e809ab01a04c39e2b9187518ee11e35f6d1c/assets/Bankeasy.svg" 
+         alt="BankEasy Architecture" 
+         style="width:100%; max-width:1100px; height:auto; display:block; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.4);">
   </a>
-  <p style="color:#9aa7b0; font-size:12px; margin-top:8px;">Click the diagram to open full-resolution, zoomable SVG.</p>
+  <p style="color:#9aa7b0; font-size:12px; margin-top:8px;">Click the diagram to open full-resolution, zoomable SVG in a new tab.</p>
 </div>
-
-> Note: SVG must be located at `./assets/Bankeasy.svg`. For best dark-mode appearance, ensure the SVG includes a dark background layer (example instructions below).
 
 ---
 
