@@ -187,6 +187,86 @@ configuration management, dual messaging infrastructure, and comprehensive monit
 - Kubernetes with StatefulSets and Deployments.
 - Helm 3 for templated charts.
 - Bitnami charts for production-ready MySQL, Kafka, Redis.
+- 
+
+## 🏢 Microservices Overview
+
+### 1️⃣ Accounts Service
+**Responsibility:** Core customer account management  
+**Key Features:**
+- Customer profile CRUD operations
+- Account creation and management
+- Balance tracking and transaction history
+- Integration with Cards and Loans services via OpenFeign
+- Event publishing to Kafka for account lifecycle events
+**Endpoints:**
+- `POST /api/create` – Create new customer account
+- `GET /api/fetch` – Retrieve account by mobile number
+- `PUT /api/update` – Update account details
+- `DELETE /api/delete` – Soft delete account
+- `GET /api/customer-details` – Aggregate view with cards and loans
+**Technologies:** Spring Boot, Spring Data JPA, MySQL, Redis Cache, OpenFeign
+
+---
+
+### 2️⃣ Cards Service
+**Responsibility:** Credit/debit card lifecycle management  
+**Key Features:**
+- Card issuance and activation
+- Credit limit management
+- Transaction tracking (amount used, outstanding balance)
+- Card renewal and closure workflows
+- Async notifications via RabbitMQ to Message service
+**Endpoints:**
+- `POST /api/create` – Issue new card
+- `GET /api/fetch` – Get card details by mobile number
+- `PUT /api/update` – Update card limits or status
+- `DELETE /api/delete` – Deactivate card
+**Technologies:** Spring Boot, Spring Data JPA, MySQL, RabbitMQ, Resilience4j
+
+---
+
+### 3️⃣ Loans Service
+**Responsibility:** Loan application and repayment tracking  
+**Key Features:**
+- Loan application processing
+- Principal and interest calculation
+- Repayment schedule management
+- Outstanding amount tracking
+- Loan status updates (pending, approved, rejected, closed)
+**Endpoints:**
+- `POST /api/create` – Apply for new loan
+- `GET /api/fetch` – Get loan details by mobile number
+- `PUT /api/update` – Update loan status or repayment
+- `DELETE /api/delete` – Close loan account
+**Technologies:** Spring Boot, Spring Data JPA, MySQL, Kafka (event publishing)
+
+---
+
+### 4️⃣ Message Service
+**Responsibility:** Asynchronous notification delivery  
+**Key Features:**
+- SMS notifications via Twilio
+- Email notifications via SMTP
+- Queue-based message processing from RabbitMQ
+- Event-driven notifications from Kafka topics
+- Retry logic with dead-letter queue
+- Notification status tracking
+**Message Sources:**
+- RabbitMQ queues for Cards/Loans notifications
+- Kafka topics for Accounts events
+- Direct API calls for immediate notifications
+**Technologies:** Spring Boot, Spring Cloud Stream, RabbitMQ, Kafka, Twilio SDK, JavaMail
+
+---
+
+### 5️⃣ Config & Discovery Services
+
+**Config Server:** Centralized configuration management for all microservices with profile-based configs and live refresh via Spring Cloud Bus.  
+
+**Eureka Server:** Service discovery and registration for dynamic service location and health monitoring.  
+
+**Gateway Server:** API Gateway providing a single entry point, JWT validation, rate limiting, circuit breakers, and route-based load balancing.  
 
 **CI/CD & DevOps**
 - GitHub Actions for automated testing, building, and deployment.
