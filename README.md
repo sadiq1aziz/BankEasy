@@ -35,148 +35,161 @@
 </div>
 
 ---
-BankEasy follows a cloud-native microservices architecture designed for scalability, resilience, and observability. The platform consists of multiple independently deployable services orchestrated through Kubernetes, with centralized configuration management, dual messaging infrastructure, and comprehensive monitoring.
-
-⚡ Architecture Highlights
-
-Gateway Pattern: Single entry point with Spring Cloud Gateway handling routing, authentication, and cross-cutting concerns.
-
-Service Discovery: Eureka-based service registry for dynamic service location.
-
-Database per Service: Each microservice maintains its own MySQL database ensuring data autonomy.
-
-Event-Driven Communication: Kafka for event streaming and RabbitMQ for message queuing.
-
-Distributed Tracing: OpenTelemetry integration with Tempo for request tracing across services.
-
-Centralized Logging: Loki aggregates logs from all services with Grafana visualization.
-
-🔐 Security & Authentication
-
-OAuth2/OIDC Integration: Keycloak-based authentication with JWT token validation.
-
-API Gateway Security: Token validation at gateway level before routing to downstream services.
-
-Resource Server Protection: Each microservice configured as OAuth2 resource server.
-
-Role-Based Access Control: Fine-grained authorization based on Keycloak roles.
-
-🚀 Microservices Architecture
-
-Accounts Service: Core customer account management with CRUD operations.
-
-Cards Service: Credit/debit card lifecycle management and transaction handling.
-
-Loans Service: Loan application processing and repayment tracking.
-
-Message Service: Asynchronous notification delivery (SMS/Email) via Twilio and SMTP.
-
-🔄 Communication Patterns
-
-Synchronous: REST APIs with Feign client for inter-service communication.
-
-Asynchronous: Kafka for event streaming and RabbitMQ for reliable message queuing.
-
-Rate Limiting: Redis-backed rate limiting at gateway level.
-
-Circuit Breaking: Resilience4j patterns for fault tolerance.
-
-📊 Configuration Management
-
-Spring Cloud Config Server: Git-backed centralized configuration repository.
-
-Dynamic Refresh: Spring Cloud Bus with RabbitMQ for live configuration updates.
-
-Environment Profiles: Separate configurations for dev, staging, and production.
-
-Encryption Support: Sensitive data encrypted using symmetric/asymmetric keys.
-
-📈 Observability Stack
-
-Metrics: Prometheus scraping with Grafana dashboards for visualization.
-
-Logging: Structured JSON logs aggregated in Loki.
-
-Tracing: OpenTelemetry spans exported to Tempo.
-
-Unified View: Grafana correlates metrics, logs, and traces for comprehensive debugging.
-
-☸️ Cloud-Native Deployment
-
-Containerization: Docker images for all services with multi-stage builds.
-
-Kubernetes Orchestration: Helm charts for declarative infrastructure.
-
-Service Mesh Ready: Architecture supports Istio/Linkerd integration.
-
-Horizontal Scaling: StatefulSets for stateful services, Deployments for stateless.
-
-🛠️ Technology Stack
-
-Backend Framework
-
-Spring Boot 3.x: Core application framework with embedded server.
-
-Spring Cloud: Microservices patterns (Gateway, Config, Eureka, Feign).
-
-Spring Data JPA: ORM with Hibernate for database operations.
-
-Spring Security: OAuth2 resource server implementation.
-
-Resilience4j: Circuit breaker, retry, and rate limiter patterns.
-
-Messaging Infrastructure
-
-Apache Kafka 4.0: Event streaming platform for high-throughput async communication.
-
-RabbitMQ: AMQP message broker for Spring Cloud Bus and inter-service queues.
-
-Spring Cloud Stream: Abstraction layer for messaging binders.
-
-Authentication & Authorization
-
-Keycloak: Identity and access management with OIDC/OAuth2 protocols.
-
-JWT: Stateless token-based authentication.
-
-Spring Security OAuth2: Resource server configuration for protected endpoints.
-
-Data Layer
-
-MySQL: Relational database for each microservice (accounts, cards, loans).
-
-Redis: In-memory cache for rate limiting and session management.
-
-Flyway/Liquibase: Database migration and version control.
-
-Observability & Monitoring
-
-Prometheus: Time-series metrics collection and alerting.
-
-Grafana: Visualization dashboards for metrics, logs, and traces.
-
-Loki: Log aggregation with label-based indexing.
-
-Tempo: Distributed tracing backend for OpenTelemetry spans.
-
-Grafana Alloy: OpenTelemetry collector for unified telemetry pipeline.
-
-Container Orchestration
-
-Docker: Containerization with multi-stage builds for optimized images.
-
-Kubernetes: Container orchestration with StatefulSets and Deployments.
-
-Helm 3: Package manager for Kubernetes with templated charts.
-
-Bitnami Charts: Production-ready charts for MySQL, Kafka, Redis.
-
-CI/CD & DevOps
-
-GitHub Actions: Automated testing, building, and deployment pipelines.
-
-Jenkins: Alternative CI/CD with declarative pipelines.
-
-Docker Registry: Private registry for container images.
-
-Kubernetes Secrets: Secure credential management.
+BankEasy follows a **cloud-native microservices architecture** designed for **scalability, resilience, and observability**. 
+The platform consists of multiple independently deployable services orchestrated through **Kubernetes**, with centralized 
+configuration management, dual messaging infrastructure, and comprehensive monitoring.
+
+---
+
+### ⚡ Architecture Highlights
+- **Gateway Pattern**
+  - Single entry point for all client requests.
+  - Spring Cloud Gateway handles **routing, authentication, and cross-cutting concerns** like logging and rate-limiting.
+- **Service Discovery**
+  - Eureka-based service registry allows dynamic discovery of microservices.
+  - Ensures services can scale or restart without manual reconfiguration.
+- **Database per Service**
+  - Each microservice maintains its **own MySQL database** for autonomy.
+  - Prevents coupling and improves data encapsulation.
+- **Event-Driven Communication**
+  - Kafka provides **high-throughput asynchronous event streaming**.
+  - RabbitMQ is used for **message queuing** in Spring Cloud Bus and inter-service notifications.
+- **Distributed Tracing**
+  - OpenTelemetry integration enables tracing requests across multiple services.
+  - Tempo collects and visualizes spans for debugging performance issues.
+- **Centralized Logging**
+  - Loki aggregates logs from all services in structured JSON format.
+  - Grafana provides a **visual dashboard** for log search, correlation, and monitoring.
+
+---
+
+### 🔐 Security & Authentication
+- **OAuth2/OIDC Integration**
+  - Keycloak manages authentication using OpenID Connect and OAuth2.
+  - Microservices validate **JWT tokens** for stateless security.
+- **API Gateway Security**
+  - Gateway validates tokens before routing requests to downstream services.
+  - Protects against unauthorized access at the entry point.
+- **Resource Server Protection**
+  - Each microservice is configured as an OAuth2 resource server.
+  - Enforces **fine-grained access control** at the service level.
+- **Role-Based Access Control**
+  - Authorization is based on Keycloak roles.
+  - Supports **user-specific permissions and admin privileges**.
+
+---
+
+### 🚀 Microservices Architecture
+- **Accounts Service**
+  - Manages customer accounts.
+  - Handles **CRUD operations** and maintains account metadata.
+- **Cards Service**
+  - Lifecycle management of credit/debit cards.
+  - Processes **transactions, card issuance, and block/unblock actions**.
+- **Loans Service**
+  - Manages loan applications and repayment tracking.
+  - Calculates interest and schedules payment plans.
+- **Message Service**
+  - Sends notifications asynchronously via **Twilio (SMS) and SMTP (Email)**.
+  - Supports **event-driven alerts** for account and loan activities.
+
+---
+
+### 🔄 Communication Patterns
+- **Synchronous Communication**
+  - REST APIs with **Spring Cloud OpenFeign** clients.
+  - Enables direct inter-service requests with fallback strategies.
+- **Asynchronous Communication**
+  - Kafka handles **event streaming** between services.
+  - RabbitMQ ensures **reliable message delivery** for critical workflows.
+- **Rate Limiting**
+  - Redis-backed rate limiting at the API gateway prevents overload.
+- **Circuit Breaking**
+  - Resilience4j implements **retry, timeout, and circuit breaker patterns**.
+  - Ensures fault tolerance and graceful degradation of service.
+
+---
+
+### 📊 Configuration Management
+- **Spring Cloud Config Server**
+  - Centralized, Git-backed configuration repository.
+  - Provides versioned configurations for all environments.
+- **Dynamic Refresh**
+  - Spring Cloud Bus with RabbitMQ propagates live config changes.
+- **Environment Profiles**
+  - Separate configurations for **dev, staging, and production**.
+- **Encryption Support**
+  - Sensitive properties encrypted using symmetric/asymmetric keys.
+
+---
+
+### 📈 Observability Stack
+- **Metrics**
+  - Prometheus scrapes microservice metrics.
+  - Grafana dashboards provide **real-time monitoring**.
+- **Logging**
+  - Structured JSON logs aggregated in Loki.
+  - Labels allow **filtering by service, instance, or severity**.
+- **Tracing**
+  - OpenTelemetry spans exported to Tempo for distributed tracing.
+  - Traces help identify **latency bottlenecks** across services.
+- **Unified View**
+  - Grafana correlates metrics, logs, and traces for **comprehensive debugging**.
+
+---
+
+### ☸️ Cloud-Native Deployment
+- **Containerization**
+  - All services packaged as Docker images with **multi-stage builds** for optimization.
+- **Kubernetes Orchestration**
+  - Helm charts for declarative deployments.
+  - StatefulSets for stateful services (databases) and Deployments for stateless services.
+- **Service Mesh Ready**
+  - Supports Istio/Linkerd integration for traffic management and observability.
+- **Horizontal Scaling**
+  - Kubernetes enables scaling individual services independently based on load.
+
+---
+
+### 🛠️ Technology Stack
+
+**Backend Framework**
+- Spring Boot 3.x with embedded server.
+- Spring Cloud for microservices patterns: **Gateway, Config, Eureka, OpenFeign**.
+- Spring Data JPA with Hibernate for ORM.
+- Spring Security as OAuth2 resource server.
+- Resilience4j for **circuit breaker, retry, and rate limiter patterns**.
+
+**Messaging Infrastructure**
+- Apache Kafka 4.0 for event streaming.
+- RabbitMQ as AMQP broker for Spring Cloud Bus and queues.
+- Spring Cloud Stream for messaging abstraction.
+
+**Authentication & Authorization**
+- Keycloak for identity management with OAuth2/OIDC.
+- JWT for stateless authentication.
+- Spring Security OAuth2 to protect endpoints.
+
+**Data Layer**
+- MySQL for each microservice (accounts, cards, loans).
+- Redis for caching, rate limiting, and session management.
+- Flyway/Liquibase for database migrations and version control.
+
+**Observability & Monitoring**
+- Prometheus for metrics collection and alerting.
+- Grafana for visualization dashboards.
+- Loki for centralized log aggregation.
+- Tempo for distributed tracing.
+- Grafana Alloy as unified telemetry collector.
+
+**Container Orchestration**
+- Docker with multi-stage builds.
+- Kubernetes with StatefulSets and Deployments.
+- Helm 3 for templated charts.
+- Bitnami charts for production-ready MySQL, Kafka, Redis.
+
+**CI/CD & DevOps**
+- GitHub Actions for automated testing, building, and deployment.
+- Jenkins as alternative CI/CD solution.
+- Docker Registry for storing container images.
+- Kubernetes Secrets for secure credentials.
