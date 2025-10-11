@@ -489,6 +489,7 @@ services:
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK-SET-URI: "http://keycloak:8080/realms/master/protocol/openid-connect/certs"
     #  app name for otel to identify
       OTEL_SERVICE_NAME: "gatewayserver"
+
   rabbit:
     # rabbit requires specifc defined props based on docs
     image: "rabbitmq:4-management"

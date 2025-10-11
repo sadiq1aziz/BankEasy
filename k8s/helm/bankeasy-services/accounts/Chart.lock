@@ -1,0 +1,6 @@
+dependencies:
+- name: bankeasy-common
+  repository: file://../../bankeasy-common
+  version: 0.1.0
+digest: sha256:5f087206dedd947808164ee99b6b9a9644db29999df3e807c6ed81d22badf05a
+generated: "2025-07-21T00:43:16.6982514+05:30"

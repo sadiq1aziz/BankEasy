@@ -282,7 +282,7 @@ services:
       service: microservice-db-configuration
 
   accounts:
-    image: "mrlearn/accounts:v1.10"
+    image: "mrlearn/accounts:v1.11"
     container_name: accounts-ms
     #   ports will be closed as we configure microservice app to communicate only post auth via keycloak
     #   communication will occur only using internal network
@@ -299,6 +299,8 @@ services:
         condition: service_healthy
       accountsdb:
         condition: service_healthy
+      kafka:
+        condition: service_healthy
     extends:
       file: common-config.yml
       service: microservice-eurekaserver-config
@@ -311,7 +313,7 @@ services:
       OTEL_SERVICE_NAME: "accounts"
 
   loans:
-    image: "mrlearn/loans:v1.10"
+    image: "mrlearn/loans:v1.11"
     container_name: loans-ms
     #   ports will be closed as we configure microservice app to communicate only post auth via keycloak
     #   communication will occur only using internal network
@@ -340,7 +342,7 @@ services:
       OTEL_SERVICE_NAME: "loans"
 
   loans1:
-    image: "mrlearn/loans:v1.10"
+    image: "mrlearn/loans:v1.11"
     container_name: loans-ms1
     ports:
       - "8091:8090"
@@ -369,7 +371,7 @@ services:
       OTEL_SERVICE_NAME: "loans1"
 
   cards:
-    image: "mrlearn/cards:v1.10"
+    image: "mrlearn/cards:v1.11"
     container_name: cards-ms
     #   ports will be closed as we configure microservice app to communicate only post auth via keycloak
     #   communication will occur only using internal network
@@ -386,6 +388,8 @@ services:
         condition: service_healthy
       cardsdb:
         condition: service_healthy
+      kafka:
+        condition: service_healthy
     extends:
       file: common-config.yml
       service: microservice-eurekaserver-config
@@ -394,11 +398,12 @@ services:
       #   This is the jdbc URL we override from the application.yml of the application ms
       SPRING_DATASOURCE_URL: jdbc:mysql://cardsdb:3306/cardsdb
       SPRING_APPLICATION_NAME: "cards"
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       #  app name for otel to identify
       OTEL_SERVICE_NAME: "cards"
 
   configserver:
-    image: "mrlearn/configserver:v1.10"
+    image: "mrlearn/configserver:v1.11"
     container_name: configserver-ms
     ports:
       - "8071:8071"
@@ -420,7 +425,7 @@ services:
       OTEL_SERVICE_NAME: "configserver"
 
   eurekaserver:
-    image: "mrlearn/eurekaserver:v1.10"
+    image: "mrlearn/eurekaserver:v1.11"
     container_name: eurekaserver-ms
     ports:
       - "8070:8070"
@@ -447,7 +452,7 @@ services:
       OTEL_SERVICE_NAME: "eurekaserver"
 
   gatewayserver:
-    image: "mrlearn/gatewayserver:v1.10"
+    image: "mrlearn/gatewayserver:v1.11"
     container_name: gatewayserver-ms
     ports:
       - "8072:8072"
@@ -502,11 +507,40 @@ services:
       file: common-config.yml
       service: microservice-network-config
 
+  kafka:
+    image: docker.io/bitnami/kafka:3.9
+    ports:
+      - "9092:9092"
+    volumes:
+      - "kafka_data:/bitnami"
+    healthcheck:
+      test: [ "CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    mem_limit: 700m
+    environment:
+      # KRaft settings
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      # Listeners
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+    extends:
+      file: common-config.yml
+      service: microservice-network-config
+
   message:
-    image: "mrlearn/message:v1.10"
+    image: "mrlearn/message:v1.11"
     container_name: message-ms
     depends_on:
       rabbit:
+        condition: service_healthy
+      kafka:
         condition: service_healthy
     extends:
       file: common-config.yml
@@ -517,7 +551,16 @@ services:
       TWILIO_NUMBER: ${TWILIO_NUMBER}
       MAIL_USERNAME: ${MAIL_USERNAME}
       MAIL_PASSWORD: ${MAIL_PASSWORD}
-
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      SPRING_CLOUD_STREAM_BINDERS_RABBITMQ_ENVIRONMENT_SPRING_RABBITMQ_HOST: rabbitmq
 networks:
   bankeasy:
     driver: "bridge"
+
+volumes:
+  kafka_data:
+    driver: local

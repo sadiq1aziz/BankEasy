@@ -1,0 +1,27 @@
+dependencies:
+- name: bankeasy-common
+  repository: file://../../bankeasy-common
+  version: 0.1.0
+- name: configserver
+  repository: file://../../bankeasy-services/configserver
+  version: 0.1.0
+- name: eurekaserver
+  repository: file://../../bankeasy-services/eurekaserver
+  version: 0.1.0
+- name: accounts
+  repository: file://../../bankeasy-services/accounts
+  version: 0.1.0
+- name: cards
+  repository: file://../../bankeasy-services/cards
+  version: 0.1.0
+- name: loans
+  repository: file://../../bankeasy-services/loans
+  version: 0.1.0
+- name: gatewayserver
+  repository: file://../../bankeasy-services/gatewayserver
+  version: 0.1.0
+- name: message
+  repository: file://../../bankeasy-services/message
+  version: 0.1.0
+digest: sha256:c7dbebd6995fd2413563c22fd7f195f5b43ceb987b0570baffc8a367e4d61570
+generated: "2025-07-20T14:00:54.7156278+05:30"
