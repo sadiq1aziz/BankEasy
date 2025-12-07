@@ -267,7 +267,7 @@ Screenshots attached for reference.
 
 <img width="975" height="700" alt="image" src="https://github.com/user-attachments/assets/81b59216-07ac-4913-b247-6b86994e4957" />
 
-<img width="975" height="573" alt="image" src="https://github.com/user-attachments/assets/29ac0571-587f-4ffa-92fd-376704ec8ffc" />
+<img width="975" height="305" alt="image" src="https://github.com/user-attachments/assets/64a2d336-b1db-45e5-8d1b-80f0ed435ca0" />
 
 **Postman Service Validation**
 
