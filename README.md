@@ -261,6 +261,8 @@ Screenshots attached for reference.
 
 <img width="1619" height="758" alt="image" src="https://github.com/user-attachments/assets/0a71d4d2-7f54-4335-9f56-9efa423c56f8" />
 
+<img width="975" height="456" alt="image" src="https://github.com/user-attachments/assets/dc8fb609-883e-4675-a1d9-29de9582d9df" />
+
 **WorkLoad Pods Check**
 
 <img width="975" height="700" alt="image" src="https://github.com/user-attachments/assets/81b59216-07ac-4913-b247-6b86994e4957" />
