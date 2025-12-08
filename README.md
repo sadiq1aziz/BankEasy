@@ -335,3 +335,12 @@ Screenshots attached for reference.
 
 <img width="975" height="446" alt="image" src="https://github.com/user-attachments/assets/8bdf396e-8246-4238-9523-ad9b0f5addae" />
 
+**Grafana - Health Metrics monitored via Prometheus**
+
+<img width="975" height="532" alt="image" src="https://github.com/user-attachments/assets/2923d061-3ad9-48c2-a424-ecbb8030c037" />
+
+**Grafana - Distributed tracing with Loki and Tempo**
+
+<img width="975" height="533" alt="image" src="https://github.com/user-attachments/assets/a8d851d1-53f1-4449-8663-09008609cf9a" />
+
+
