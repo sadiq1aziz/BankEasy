@@ -1,4 +1,4 @@
-<img width="1687" height="922" alt="image" src="https://github.com/user-attachments/assets/b26e3f98-2a7e-48c4-9d69-3cb9115fbfb8" /># 🏦 BankEasy - Cloud-Native Microservices Banking Platform
+# 🏦 BankEasy - Cloud-Native Microservices Banking Platform
 
 > Enterprise-grade microservices platform demonstrating API Gateway, dual message brokers, distributed tracing, and comprehensive observability
 
